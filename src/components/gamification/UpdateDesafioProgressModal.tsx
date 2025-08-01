@@ -15,6 +15,7 @@ import { ProgressRing } from '@/components/gamification/ProgressRing';
 import { ConfettiAnimation, useConfetti } from '@/components/gamification/ConfettiAnimation';
 import { VisualEffectsManager, useAlternatingEffects } from '@/components/gamification/VisualEffectsManager';
 import { useCommunityShare } from '@/hooks/useCommunityShare';
+import { useCelebrationEffects } from '@/hooks/useCelebrationEffects';
 
 interface Desafio {
   id: string;
@@ -69,6 +70,7 @@ export const UpdateDesafioProgressModal = ({
   const { trigger, celebrate } = useConfetti();
   const { trigger: effectTrigger, currentEffect, celebrateWithEffects } = useAlternatingEffects();
   const { shareToHealthFeed, generateProgressMessage, suggestTags, isSharing } = useCommunityShare();
+  const { celebrateDesafioCompletion } = useCelebrationEffects();
 
   const effectiveDesafio = desafio || {
     id: '',
@@ -134,7 +136,10 @@ export const UpdateDesafioProgressModal = ({
         const { error: pointsError } = await supabase
           .from('profiles')
           .update({
-            points: supabase.sql`points + ${effectiveDesafio.points_reward}`,
+            points: (supabase as any).rpc('increment_points', { 
+              user_id: user.id, 
+              points_to_add: effectiveDesafio.points_reward 
+            }),
             updated_at: new Date().toISOString()
           })
           .eq('user_id', user.id);
@@ -164,7 +169,7 @@ export const UpdateDesafioProgressModal = ({
       // Efeitos de celebração
       if (isCompleted) {
         celebrateWithEffects();
-        trigger();
+        celebrateDesafioCompletion();
         toast({
           title: "🎉 Desafio Concluído!",
           description: `Parabéns! Você ganhou ${effectiveDesafio.points_reward} pontos!`,

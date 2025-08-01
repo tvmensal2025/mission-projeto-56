@@ -343,8 +343,8 @@ export const CreateGoalModal = ({ open, onOpenChange }: CreateGoalModalProps) =>
       {/* Visual Effects */}
       {activeCelebration && (
         <VisualEffectsManager
-          trigger={activeCelebration.trigger}
-          effectType={activeCelebration.type}
+          trigger={true}
+          effectType="celebration"
           duration={3000}
         />
       )}

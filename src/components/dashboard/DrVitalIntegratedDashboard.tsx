@@ -91,10 +91,10 @@ const DrVitalIntegratedDashboard: React.FC = () => {
   };
 
   const calculateTrackingSummary = (): TrackingSummary => {
-    const last7Days = trackingData?.daily_advanced_tracking?.slice(0, 7) || [];
-    const waterData = trackingData?.water_tracking?.slice(0, 7) || [];
-    const sleepData = trackingData?.sleep_tracking?.slice(0, 7) || [];
-    const moodData = trackingData?.mood_tracking?.slice(0, 7) || [];
+    const last7Days = (trackingData as any)?.daily_advanced_tracking?.slice(0, 7) || [];
+    const waterData = (trackingData as any)?.water_tracking?.slice(0, 7) || [];
+    const sleepData = (trackingData as any)?.sleep_tracking?.slice(0, 7) || [];
+    const moodData = (trackingData as any)?.mood_tracking?.slice(0, 7) || [];
 
     const avgWater = waterData.length > 0 
       ? waterData.reduce((sum, day) => sum + (day.amount_ml || 0), 0) / waterData.length 
@@ -123,7 +123,7 @@ const DrVitalIntegratedDashboard: React.FC = () => {
     const exerciseDays = last7Days.filter(day => day.physical_activity).length;
 
     // Calcular tendência de peso
-    const weightData = trackingData?.weight_measurements?.slice(0, 7) || [];
+    const weightData = (trackingData as any)?.weight_measurements?.slice(0, 7) || [];
     let weightTrend = 'estável';
     if (weightData.length >= 2) {
       const firstWeight = weightData[weightData.length - 1]?.weight_kg || 0;

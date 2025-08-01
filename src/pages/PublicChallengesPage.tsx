@@ -14,7 +14,7 @@ import { getUserAvatar } from '@/lib/avatar-utils';
 import { 
   Trophy, Users, Camera, Share2, Heart, MessageCircle, 
   Crown, Medal, Star, TrendingUp, Target, Calendar,
-  Upload, Image, Smile, Fire, Award, Users2
+  Upload, Image, Smile, Flame, Award, Users2
 } from 'lucide-react';
 
 interface PublicChallenge {
@@ -234,7 +234,7 @@ export default function PublicChallengesPage({ user }: { user: User | null }) {
       }
 
       // Buscar dados do desafio
-      const challenge = publicChallenges.find(c => c.id === challengeId);
+      const challenge = challenges.find(c => c.id === challengeId);
       if (!challenge) {
         throw new Error("Desafio não encontrado");
       }

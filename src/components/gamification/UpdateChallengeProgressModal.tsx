@@ -87,7 +87,7 @@ export const UpdateChallengeProgressModal = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { trigger, celebrate } = useConfetti();
-  const { trigger: effectTrigger, currentEffect, celebrate: celebrateWithEffects } = useAlternatingEffects();
+  const { trigger: effectTrigger, currentEffect, celebrateWithEffects } = useAlternatingEffects();
   const { shareToHealthFeed, generateProgressMessage, suggestTags, isSharing } = useCommunityShare();
 
   const calculateProgress = (value: number) => {

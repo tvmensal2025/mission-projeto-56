@@ -31,7 +31,7 @@ import {
   Zap,
   Shield,
   FileImage,
-  FilePdf,
+  File,
   FileArchive
 } from 'lucide-react';
 import { format } from 'date-fns';

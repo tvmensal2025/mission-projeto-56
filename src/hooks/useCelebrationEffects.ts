@@ -30,10 +30,20 @@ export const useCelebrationEffects = () => {
     }, 1500);
   };
 
+  const celebrateGoalCompletion = () => {
+    setActiveCelebration(true);
+    
+    // Reset após 3 segundos
+    setTimeout(() => {
+      setActiveCelebration(false);
+    }, 3000);
+  };
+
   return {
     activeCelebration,
     celebrateDesafioCompletion,
     celebrateProgressUpdate,
-    celebrateParticipation
+    celebrateParticipation,
+    celebrateGoalCompletion
   };
 };
