@@ -16,82 +16,48 @@ export type Database = {
     Tables: {
       ai_configurations: {
         Row: {
-          id: string
+          created_at: string | null
           functionality: string
-          service: string
+          id: string
+          is_active: boolean | null
+          is_enabled: boolean | null
+          max_tokens: number | null
           model: string
-          max_tokens: number
-          temperature: number
-          is_enabled: boolean
+          preset_level: string | null
+          service: string
           system_prompt: string | null
-          personality: string
-          level: string
-          cost_per_request: number
-          priority: number
-          created_at: string
-          updated_at: string
+          temperature: number | null
+          updated_at: string | null
         }
         Insert: {
-          id?: string
+          created_at?: string | null
           functionality: string
-          service?: string
+          id?: string
+          is_active?: boolean | null
+          is_enabled?: boolean | null
+          max_tokens?: number | null
           model?: string
-          max_tokens?: number
-          temperature?: number
-          is_enabled?: boolean
+          preset_level?: string | null
+          service?: string
           system_prompt?: string | null
-          personality?: string
-          level?: string
-          cost_per_request?: number
-          priority?: number
-          created_at?: string
-          updated_at?: string
+          temperature?: number | null
+          updated_at?: string | null
         }
         Update: {
-          id?: string
+          created_at?: string | null
           functionality?: string
-          service?: string
+          id?: string
+          is_active?: boolean | null
+          is_enabled?: boolean | null
+          max_tokens?: number | null
           model?: string
-          max_tokens?: number
-          temperature?: number
-          is_enabled?: boolean
+          preset_level?: string | null
+          service?: string
           system_prompt?: string | null
-          personality?: string
-          level?: string
-          cost_per_request?: number
-          priority?: number
-          created_at?: string
-          updated_at?: string
+          temperature?: number | null
+          updated_at?: string | null
         }
-      }
-      ai_documents: {
-        Row: {
-          id: string
-          name: string
-          type: string
-          content: string
-          functionality: string
-          uploaded_at: string
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          type?: string
-          content: string
-          functionality?: string
-          uploaded_at?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          type?: string
-          content?: string
-          functionality?: string
-          uploaded_at?: string
-          created_at?: string
-        }
+        Relationships: []
       }
       assessments: {
         Row: {
@@ -144,8 +110,13 @@ export type Database = {
           id: string
           is_completed: boolean | null
           joined_at: string | null
+          last_updated: string | null
+          notes: string | null
+          points_earned: number | null
           progress: number | null
           started_at: string | null
+          status: string | null
+          target_value: number | null
           updated_at: string | null
           user_id: string | null
         }
@@ -160,8 +131,13 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           joined_at?: string | null
+          last_updated?: string | null
+          notes?: string | null
+          points_earned?: number | null
           progress?: number | null
           started_at?: string | null
+          status?: string | null
+          target_value?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -176,8 +152,13 @@ export type Database = {
           id?: string
           is_completed?: boolean | null
           joined_at?: string | null
+          last_updated?: string | null
+          notes?: string | null
+          points_earned?: number | null
           progress?: number | null
           started_at?: string | null
+          status?: string | null
+          target_value?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
@@ -197,8 +178,10 @@ export type Database = {
           badge_name: string | null
           category: string | null
           challenge_type: string | null
+          completion_criteria: Json | null
           created_at: string | null
           created_by: string | null
+          current_participants: number | null
           daily_log_target: number | null
           daily_log_type: string | null
           daily_log_unit: string | null
@@ -206,14 +189,23 @@ export type Database = {
           difficulty: string | null
           duration_days: number | null
           end_date: string | null
+          entry_fee: number | null
+          frequency: string | null
           id: string
+          image_url: string | null
           instructions: string | null
           is_active: boolean | null
           is_featured: boolean | null
           is_group_challenge: boolean | null
           max_participants: number | null
           points_reward: number | null
+          progress_tracking: Json | null
+          requirements: Json | null
+          rewards: Json | null
+          rules: string | null
           start_date: string | null
+          status: string | null
+          target_unit: string | null
           target_value: number | null
           tips: string[] | null
           title: string
@@ -225,8 +217,10 @@ export type Database = {
           badge_name?: string | null
           category?: string | null
           challenge_type?: string | null
+          completion_criteria?: Json | null
           created_at?: string | null
           created_by?: string | null
+          current_participants?: number | null
           daily_log_target?: number | null
           daily_log_type?: string | null
           daily_log_unit?: string | null
@@ -234,14 +228,23 @@ export type Database = {
           difficulty?: string | null
           duration_days?: number | null
           end_date?: string | null
+          entry_fee?: number | null
+          frequency?: string | null
           id?: string
+          image_url?: string | null
           instructions?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_group_challenge?: boolean | null
           max_participants?: number | null
           points_reward?: number | null
+          progress_tracking?: Json | null
+          requirements?: Json | null
+          rewards?: Json | null
+          rules?: string | null
           start_date?: string | null
+          status?: string | null
+          target_unit?: string | null
           target_value?: number | null
           tips?: string[] | null
           title: string
@@ -253,8 +256,10 @@ export type Database = {
           badge_name?: string | null
           category?: string | null
           challenge_type?: string | null
+          completion_criteria?: Json | null
           created_at?: string | null
           created_by?: string | null
+          current_participants?: number | null
           daily_log_target?: number | null
           daily_log_type?: string | null
           daily_log_unit?: string | null
@@ -262,14 +267,23 @@ export type Database = {
           difficulty?: string | null
           duration_days?: number | null
           end_date?: string | null
+          entry_fee?: number | null
+          frequency?: string | null
           id?: string
+          image_url?: string | null
           instructions?: string | null
           is_active?: boolean | null
           is_featured?: boolean | null
           is_group_challenge?: boolean | null
           max_participants?: number | null
           points_reward?: number | null
+          progress_tracking?: Json | null
+          requirements?: Json | null
+          rewards?: Json | null
+          rules?: string | null
           start_date?: string | null
+          status?: string | null
+          target_unit?: string | null
           target_value?: number | null
           tips?: string[] | null
           title?: string
@@ -277,6 +291,88 @@ export type Database = {
           xp_reward?: number | null
         }
         Relationships: []
+      }
+      community_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_posts: {
+        Row: {
+          challenge_id: string | null
+          comments: number | null
+          created_at: string | null
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          likes: number | null
+          message: string | null
+          photo_url: string | null
+          updated_at: string | null
+          user_id: string
+          views: number | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          comments?: number | null
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          likes?: number | null
+          message?: string | null
+          photo_url?: string | null
+          updated_at?: string | null
+          user_id: string
+          views?: number | null
+        }
+        Update: {
+          challenge_id?: string | null
+          comments?: number | null
+          created_at?: string | null
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          likes?: number | null
+          message?: string | null
+          photo_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+          views?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_posts_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_data: {
         Row: {
@@ -354,26 +450,38 @@ export type Database = {
         Row: {
           course_id: string
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
+          is_active: boolean | null
           order_index: number
+          thumbnail_url: string | null
           title: string
+          updated_at: string | null
         }
         Insert: {
           course_id: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean | null
           order_index: number
+          thumbnail_url?: string | null
           title: string
+          updated_at?: string | null
         }
         Update: {
           course_id?: string
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
+          is_active?: boolean | null
           order_index?: number
+          thumbnail_url?: string | null
           title?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -389,11 +497,13 @@ export type Database = {
         Row: {
           category: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           difficulty_level: string | null
           duration_minutes: number | null
           id: string
           instructor_name: string | null
+          is_active: boolean | null
           is_premium: boolean | null
           is_published: boolean | null
           price: number | null
@@ -404,11 +514,13 @@ export type Database = {
         Insert: {
           category?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           difficulty_level?: string | null
           duration_minutes?: number | null
           id?: string
           instructor_name?: string | null
+          is_active?: boolean | null
           is_premium?: boolean | null
           is_published?: boolean | null
           price?: number | null
@@ -419,11 +531,13 @@ export type Database = {
         Update: {
           category?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           difficulty_level?: string | null
           duration_minutes?: number | null
           id?: string
           instructor_name?: string | null
+          is_active?: boolean | null
           is_premium?: boolean | null
           is_published?: boolean | null
           price?: number | null
@@ -1037,39 +1151,64 @@ export type Database = {
       }
       lessons: {
         Row: {
+          content: string | null
+          course_id: string | null
           created_at: string
+          created_by: string | null
           description: string | null
           duration_minutes: number | null
           id: string
+          is_active: boolean | null
           is_free: boolean | null
           module_id: string
           order_index: number
+          thumbnail_url: string | null
           title: string
+          updated_at: string | null
           video_url: string | null
         }
         Insert: {
+          content?: string | null
+          course_id?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          is_active?: boolean | null
           is_free?: boolean | null
           module_id: string
           order_index: number
+          thumbnail_url?: string | null
           title: string
+          updated_at?: string | null
           video_url?: string | null
         }
         Update: {
+          content?: string | null
+          course_id?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          is_active?: boolean | null
           is_free?: boolean | null
           module_id?: string
           order_index?: number
+          thumbnail_url?: string | null
           title?: string
+          updated_at?: string | null
           video_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lessons_module_id_fkey"
             columns: ["module_id"]
@@ -1192,38 +1331,69 @@ export type Database = {
       }
       profiles: {
         Row: {
-          id: string
-          email: string
-          full_name: string | null
+          achievements: string[] | null
+          admin_level: string | null
+          age: number | null
           avatar_url: string | null
-          phone: string | null
+          bio: string | null
           birth_date: string | null
           city: string | null
+          country: string | null
           created_at: string
+          email: string | null
+          full_name: string | null
+          gender: string | null
+          goals: string[] | null
+          id: string
+          phone: string | null
+          postal_code: string | null
+          role: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
-          id: string
-          email: string
-          full_name?: string | null
+          achievements?: string[] | null
+          admin_level?: string | null
+          age?: number | null
           avatar_url?: string | null
-          phone?: string | null
+          bio?: string | null
           birth_date?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
+          gender?: string | null
+          goals?: string[] | null
+          id?: string
+          phone?: string | null
+          postal_code?: string | null
+          role?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
-          id?: string
-          email?: string
-          full_name?: string | null
+          achievements?: string[] | null
+          admin_level?: string | null
+          age?: number | null
           avatar_url?: string | null
-          phone?: string | null
+          bio?: string | null
           birth_date?: string | null
           city?: string | null
+          country?: string | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
+          gender?: string | null
+          goals?: string[] | null
+          id?: string
+          phone?: string | null
+          postal_code?: string | null
+          role?: string | null
           updated_at?: string
+          user_id?: string | null
         }
+        Relationships: []
       }
       sessions: {
         Row: {
@@ -1761,6 +1931,7 @@ export type Database = {
           difficulty: string | null
           estimated_points: number | null
           evidence_required: boolean | null
+          final_points: number | null
           gordura_corporal_meta_percent: number | null
           id: string
           imc_meta: number | null
@@ -1794,6 +1965,7 @@ export type Database = {
           difficulty?: string | null
           estimated_points?: number | null
           evidence_required?: boolean | null
+          final_points?: number | null
           gordura_corporal_meta_percent?: number | null
           id?: string
           imc_meta?: number | null
@@ -1827,6 +1999,7 @@ export type Database = {
           difficulty?: string | null
           estimated_points?: number | null
           evidence_required?: boolean | null
+          final_points?: number | null
           gordura_corporal_meta_percent?: number | null
           id?: string
           imc_meta?: number | null
@@ -1913,6 +2086,45 @@ export type Database = {
           sexo?: string
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -2365,6 +2577,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_goal: {
+        Args: { goal_id: string; admin_user_id: string; admin_notes?: string }
+        Returns: Json
+      }
       calculate_daily_tracking_score: {
         Args: { p_user_id: string; p_date: string }
         Returns: number
@@ -2376,6 +2592,15 @@ export type Database = {
       calculate_weekly_health_score: {
         Args: { p_user_id: string; p_week_start: string }
         Returns: number
+      }
+      reject_goal: {
+        Args: {
+          goal_id: string
+          admin_user_id: string
+          rejection_reason: string
+          admin_notes?: string
+        }
+        Returns: Json
       }
       sync_device_data: {
         Args: {
