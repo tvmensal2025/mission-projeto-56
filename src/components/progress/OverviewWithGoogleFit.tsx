@@ -218,7 +218,7 @@ export const OverviewWithGoogleFit: React.FC<OverviewWithGoogleFitProps> = ({
             <motion.div variants={cardVariants} whileHover="hover">
               <Card className="p-6">
                 <h3 className="text-xl font-semibold mb-2">Dias de Acompanhamento</h3>
-                <div className="text-3xl font-bold">{measurementDays}</div>
+                <div className="text-2xl sm:text-3xl font-bold">{measurementDays}</div>
                 <div className="mt-2 flex items-center gap-2">
                   <Target className="h-5 w-5 text-yellow-500" />
                   <span className="text-sm text-muted-foreground">
@@ -283,7 +283,7 @@ const MetricCard: React.FC<{
           </div>
           
           <div className="flex items-end gap-2 mb-2">
-            <div className="text-3xl font-bold text-muted-foreground">
+                          <div className="text-2xl sm:text-3xl font-bold text-muted-foreground">
               --
               {unit && <span className="text-lg ml-1">{unit}</span>}
             </div>
@@ -297,14 +297,14 @@ const MetricCard: React.FC<{
 
   return (
     <motion.div variants={cardVariants} whileHover="hover">
-      <Card className="p-6 transition-all duration-300 hover:shadow-lg">
+      <Card className="p-6 transition-all duration-300 hover:shadow-lg stat-card-responsive">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold">{title}</h3>
           {Icon && <Icon className="h-5 w-5 text-muted-foreground" />}
         </div>
         
         <div className="flex items-end gap-2 mb-2">
-          <div className="text-3xl font-bold">
+          <div className="stat-number-responsive">
             {value?.toFixed(1)}
             {unit && <span className="text-lg ml-1">{unit}</span>}
           </div>
@@ -348,13 +348,13 @@ const GoogleFitMetricCard: React.FC<{
 
   return (
     <motion.div variants={cardVariants} whileHover="hover">
-      <Card className="p-6 transition-all duration-300 hover:shadow-lg">
+      <Card className="p-6 transition-all duration-300 hover:shadow-lg stat-card-responsive">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-lg font-semibold">{title}</h3>
           <Icon className={`h-5 w-5 ${color}`} />
         </div>
         
-        <div className="text-3xl font-bold mb-2">
+        <div className="stat-number-responsive">
           {formatValue(value)}
           {unit && <span className="text-lg ml-1">{unit}</span>}
         </div>

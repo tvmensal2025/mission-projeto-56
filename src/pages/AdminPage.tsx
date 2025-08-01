@@ -26,7 +26,6 @@ import {
   CreditCard,
   Activity,
   Bell,
-  Bot,
   Brain,
   Building2
 } from "lucide-react";
@@ -44,7 +43,6 @@ import { N8nWebhookManager } from "@/components/N8nWebhookManager";
 import { AIControlPanelUnified } from "@/components/admin/AIControlPanelUnified";
 import IntelligentReports from "@/components/admin/IntelligentReports";
 import CompanyConfiguration from "@/components/admin/CompanyConfiguration";
-import PreventiveAnalyticsDashboard from "@/components/admin/PreventiveAnalyticsDashboard";
 
 import SystemStatus from "@/components/admin/SystemStatus";
 import SimulatedTests from "@/components/admin/SimulatedTests";
@@ -156,9 +154,7 @@ const AdminPage = () => {
     { id: 'challenges', icon: Award, label: 'Gestão de Metas e Desafios', color: 'text-pink-500', description: 'Criar e gerenciar metas e desafios' },
     { id: 'payments', icon: CreditCard, label: 'Gestão de Pagamentos', color: 'text-emerald-500', description: 'Gestão Asaas e assinaturas' },
     { id: 'company-config', icon: Building2, label: '🏢 Dados da Empresa', color: 'text-indigo-500', description: 'Configure dados da empresa para melhor IA' },
-    { id: 'preventive-analytics', icon: Activity, label: '🔮 Análises Preventivas', color: 'text-red-500', description: 'Dr. Vital - Análises quinzenais e mensais automatizadas' },
-    { id: 'ai-config', icon: Bot, label: '🚀 IA Inteligente', color: 'text-purple-500', description: 'Configuração Avançada - MÁXIMO/MEIO/MÍNIMO' },
-    { id: 'ai-master', icon: Brain, label: '🧠 Controle Total IA', color: 'text-red-500', description: 'Controle Total de TODAS as IAs - Admin Master' },
+    { id: 'ai-control', icon: Brain, label: '🧠 Controle Unificado de IA', color: 'text-purple-500', description: 'Configuração Avançada - DrVital/Sofia - MÁXIMO/MEIO/MÍNIMO' },
     { id: 'sessions', icon: FileText, label: 'Gestão de Sessões', color: 'text-cyan-500', description: 'Criar e enviar sessões personalizadas' },
     { id: 'n8n', icon: Activity, label: 'Automação n8n', color: 'text-violet-500', description: 'Webhooks para WhatsApp e automações' },
     { id: 'devices', icon: Monitor, label: 'Gestão de Dispositivos', color: 'text-indigo-500', description: 'Dispositivos conectados' },
@@ -205,15 +201,13 @@ const AdminPage = () => {
         return <ChallengeManagement user={user} />;
       case 'company-config':
         return <CompanyConfiguration />;
-      case 'preventive-analytics':
-        return <PreventiveAnalyticsDashboard />;
-      case 'ai-config':
+      case 'ai-control':
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold">🚀 Controle Unificado de IA</h1>
-                <p className="text-muted-foreground">Gerenciamento completo - OpenAI e Gemini</p>
+                <h1 className="text-3xl font-bold">🧠 Controle Unificado de IA</h1>
+                <p className="text-muted-foreground">Gerenciamento completo - DrVital/Sofia - OpenAI/Gemini</p>
               </div>
               <Badge variant="default" className="flex items-center gap-1">
                 <Brain className="h-4 w-4" />
@@ -222,22 +216,6 @@ const AdminPage = () => {
             </div>
             <AIControlPanelUnified />
             <IntelligentReports />
-          </div>
-        );
-      case 'ai-master':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">🧠 Controle Master de IA</h1>
-                <p className="text-muted-foreground">Centro de comando completo unificado</p>
-              </div>
-              <Badge variant="destructive" className="flex items-center gap-1 animate-pulse">
-                <Brain className="h-4 w-4" />
-                ADMIN MASTER
-              </Badge>
-            </div>
-            <AIControlPanelUnified />
           </div>
         );
       case 'payments':

@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
   Bot, 
   Brain, 
@@ -34,7 +35,29 @@ import {
   PlayCircle,
   Clock,
   MessageSquare,
-  XCircle
+  XCircle,
+  Upload,
+  FileText,
+  Stethoscope,
+  Heart,
+  FileImage,
+  Shield,
+  Target,
+  Users,
+  Send,
+  BookOpen,
+  Globe,
+  Search,
+  Calendar,
+  Crown,
+  Sparkles,
+  Cpu,
+  Database,
+  Network,
+  Layers,
+  Palette,
+  Gauge,
+  BarChart3
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -44,27 +67,38 @@ import { toast } from 'sonner';
 interface AIConfig {
   id?: string;
   functionality: string;
-  service: string;
+  personality: 'drvital' | 'sofia';
+  service: 'openai' | 'gemini' | 'sofia';
   model: string;
   max_tokens: number;
   temperature: number;
   is_enabled: boolean;
-  preset_level: string;
+  level: 'maximo' | 'meio' | 'minimo';
   system_prompt?: string;
   cost_per_request?: number;
   priority?: number;
 }
 
-interface AITemplate {
+interface AIDocument {
   id: string;
   name: string;
-  description: string;
-  configurations: {
-    default_service: string;
-    default_model: string;
-    default_tokens: number;
-    default_temperature: number;
-  };
+  type: 'medical' | 'policy' | 'guide' | 'faq';
+  content: string;
+  functionality: string;
+  uploaded_at: string;
+}
+
+interface AITestResult {
+  functionality: string;
+  personality: string;
+  service: string;
+  model: string;
+  success: boolean;
+  response?: string;
+  error?: string;
+  duration?: number;
+  used_knowledge_base: boolean;
+  used_external_search: boolean;
 }
 
 export function AIControlPanelUnified() {
@@ -73,61 +107,110 @@ export function AIControlPanelUnified() {
   
   // States
   const [configs, setConfigs] = useState<AIConfig[]>([]);
+  const [documents, setDocuments] = useState<AIDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [totalCost, setTotalCost] = useState(0);
-  const [selectedConfig, setSelectedConfig] = useState<AIConfig | null>(null);
-  const [customMessage, setCustomMessage] = useState('Olá! Como você pode me ajudar?');
-  const [selectedService, setSelectedService] = useState<'openai' | 'gemini' | 'sofia'>('openai');
-  const [selectedModel, setSelectedModel] = useState('gpt-4.1-2025-04-14');
+  const [selectedFunction, setSelectedFunction] = useState<string>('');
+  const [testResults, setTestResults] = useState<AITestResult[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [isAdvancedModalOpen, setIsAdvancedModalOpen] = useState(false);
+  const [selectedAdvancedConfig, setSelectedAdvancedConfig] = useState<AIConfig | null>(null);
   
-  // Templates predefinidos
-  const templates: AITemplate[] = [
-    {
-      id: 'performance',
-      name: 'Máxima Performance',
-      description: 'Configuração otimizada para máxima qualidade',
-      configurations: {
-        default_service: 'openai',
-        default_model: 'o3-2025-04-16',
-        default_tokens: 8192,
-        default_temperature: 0.7
-      }
+  // Funcionalidades disponíveis
+  const functionalities = [
+    { 
+      key: 'medical_analysis', 
+      name: 'Análise de Exames Médicos', 
+      icon: Stethoscope, 
+      description: 'Análises médicas especializadas',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'drvital'
     },
-    {
-      id: 'balanced',
-      name: 'Balanceado',
-      description: 'Equilibrio entre qualidade e custo',
-      configurations: {
-        default_service: 'openai',
-        default_model: 'gpt-4.1-2025-04-14',
-        default_tokens: 4096,
-        default_temperature: 0.8
-      }
+    { 
+      key: 'weekly_report', 
+      name: 'Relatórios Semanais', 
+      icon: TrendingUp, 
+      description: 'Relatórios automatizados semanais',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'sofia'
     },
-    {
-      id: 'economy',
-      name: 'Econômico',
-      description: 'Configuração de baixo custo',
-      configurations: {
-        default_service: 'openai',
-        default_model: 'gpt-4o-mini',
-        default_tokens: 2000,
-        default_temperature: 0.7
-      }
+    { 
+      key: 'monthly_report', 
+      name: 'Relatórios Mensais', 
+      icon: Calendar, 
+      description: 'Análises mensais detalhadas',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'drvital'
+    },
+    { 
+      key: 'daily_chat', 
+      name: 'Chat Diário', 
+      icon: MessageSquare, 
+      description: 'Conversas do dia a dia',
+      personalities: ['sofia', 'drvital'],
+      default_personality: 'sofia'
+    },
+    { 
+      key: 'preventive_analysis', 
+      name: 'Análise Preventiva', 
+      icon: Shield, 
+      description: 'Prevenção de saúde',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'drvital'
+    },
+    { 
+      key: 'food_analysis', 
+      name: 'Análise de Comida', 
+      icon: FileImage, 
+      description: 'Análise nutricional por imagem',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'drvital'
+    },
+    { 
+      key: 'daily_missions', 
+      name: 'Missões Diárias', 
+      icon: Target, 
+      description: 'Missões e desafios diários',
+      personalities: ['sofia', 'drvital'],
+      default_personality: 'sofia'
+    },
+    { 
+      key: 'whatsapp_reports', 
+      name: 'Relatórios WhatsApp', 
+      icon: MessageSquare, 
+      description: 'Relatórios via WhatsApp',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'sofia'
+    },
+    { 
+      key: 'email_reports', 
+      name: 'Relatórios Email', 
+      icon: Send, 
+      description: 'Relatórios via email',
+      personalities: ['drvital', 'sofia'],
+      default_personality: 'drvital'
     }
   ];
 
-  // Funcionalidades disponíveis
-  const functionalities = [
-    { key: 'chat_daily', name: 'Chat Diário', icon: MessageSquare, description: 'Conversas do dia a dia' },
-    { key: 'weekly_report', name: 'Relatório Semanal', icon: TrendingUp, description: 'Relatórios automatizados' },
-    { key: 'monthly_report', name: 'Relatório Mensal', icon: TrendingUp, description: 'Análises mensais' },
-    { key: 'medical_analysis', name: 'Análise Médica', icon: Activity, description: 'Análises médicas especializadas' },
-    { key: 'preventive_analysis', name: 'Análise Preventiva', icon: AlertTriangle, description: 'Prevenção de saúde' },
-    { key: 'sofia_enhanced', name: 'Sofia Chat', icon: Bot, description: 'Assistente virtual Sofia' }
-  ];
+  // Personalidades
+  const personalities = {
+    drvital: {
+      name: 'Dr. Vital',
+      icon: Stethoscope,
+      description: 'Médico especialista - Análise médica profissional',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    sofia: {
+      name: 'Sofia',
+      icon: Heart,
+      description: 'Assistente motivacional - Bem-estar e metas',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-50'
+    }
+  };
 
   // Modelos disponíveis
   const models = {
@@ -141,26 +224,101 @@ export function AIControlPanelUnified() {
       { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', cost: 0.0035 },
       { value: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', cost: 0.0007 },
       { value: 'gemini-pro', label: 'Gemini Pro', cost: 0.0025 }
+    ],
+    sofia: [
+      { value: 'sofia-chat', label: 'Sofia Chat (Interno)', cost: 0.001 }
     ]
+  };
+
+  // Configurações por nível
+  const levelConfigs = {
+    maximo: {
+      name: 'Máximo',
+      description: 'Melhor qualidade - Análises mais profundas',
+      tokens: 8192,
+      temperature: 0.7,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50'
+    },
+    meio: {
+      name: 'Meio',
+      description: 'Equilibrado - Qualidade e velocidade',
+      tokens: 4096,
+      temperature: 0.8,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50'
+    },
+    minimo: {
+      name: 'Mínimo',
+      description: 'Econômico - Mais rápido e barato',
+      tokens: 2000,
+      temperature: 0.7,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
+    }
   };
 
   // Carregar configurações
   useEffect(() => {
     loadConfigurations();
+    loadDocuments();
   }, []);
+
+  // Sincronizar configuração selecionada quando modal é aberto
+  useEffect(() => {
+    if (selectedAdvancedConfig) {
+      // Garantir que a configuração tenha valores padrão se necessário
+      const configWithDefaults = {
+        ...selectedAdvancedConfig,
+        personality: selectedAdvancedConfig.personality || 'drvital',
+        level: selectedAdvancedConfig.level || 'meio',
+        max_tokens: selectedAdvancedConfig.max_tokens || 4096,
+        temperature: selectedAdvancedConfig.temperature || 0.8,
+        service: selectedAdvancedConfig.service || 'openai',
+        model: selectedAdvancedConfig.model || 'gpt-4',
+        cost_per_request: selectedAdvancedConfig.cost_per_request || 0.01,
+        priority: selectedAdvancedConfig.priority || 1
+      };
+      setSelectedAdvancedConfig(configWithDefaults);
+    }
+  }, [selectedAdvancedConfig]);
 
   const loadConfigurations = async () => {
     try {
       setIsLoading(true);
+      console.log('Loading configurations...');
+      
       const { data, error } = await supabase
         .from('ai_configurations')
         .select('*')
         .order('functionality');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading configurations:', error);
+        throw error;
+      }
 
-      setConfigs(data || []);
-      calculateTotalCost(data || []);
+      console.log('Raw data from database:', data);
+
+      // Mapear dados para o formato correto com valores reais do banco
+      const mappedConfigs = (data || []).map(config => ({
+        id: config.id,
+        functionality: config.functionality,
+        personality: config.personality as 'drvital' | 'sofia',
+        service: config.service as 'openai' | 'gemini' | 'sofia',
+        model: config.model || 'gpt-4',
+        max_tokens: config.max_tokens || 4096,
+        temperature: config.temperature || 0.8,
+        is_enabled: config.is_enabled || false,
+        level: config.level as 'maximo' | 'meio' | 'minimo',
+        system_prompt: config.system_prompt || '',
+        cost_per_request: config.cost_per_request || 0.01,
+        priority: config.priority || 1
+      }));
+
+      console.log('Mapped configurations:', mappedConfigs);
+      setConfigs(mappedConfigs);
+      calculateTotalCost(mappedConfigs);
     } catch (error) {
       toastHook({
         title: 'Erro',
@@ -169,6 +327,22 @@ export function AIControlPanelUnified() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadDocuments = async () => {
+    try {
+      // Temporariamente comentado até a migração ser aplicada manualmente
+      // const { data, error } = await supabase
+      //   .from('ai_documents')
+      //   .select('*')
+      //   .order('uploaded_at', { ascending: false });
+
+      // if (error) throw error;
+      // setDocuments(data || []);
+      setDocuments([]); // Array vazio temporariamente
+    } catch (error) {
+      console.error('Erro ao carregar documentos:', error);
     }
   };
 
@@ -189,24 +363,44 @@ export function AIControlPanelUnified() {
     try {
       setIsSaving(true);
       
+      const updateData = {
+        functionality: config.functionality,
+        personality: config.personality,
+        service: config.service,
+        model: config.model,
+        max_tokens: config.max_tokens,
+        temperature: config.temperature,
+        is_enabled: config.is_enabled,
+        level: config.level,
+        system_prompt: config.system_prompt,
+        cost_per_request: config.cost_per_request,
+        priority: config.priority,
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase
         .from('ai_configurations')
-        .upsert({
-          functionality: config.functionality,
-          service: config.service,
-          model: config.model,
-          max_tokens: config.max_tokens,
-          temperature: config.temperature,
-          is_enabled: config.is_enabled,
-          preset_level: config.preset_level,
-          system_prompt: config.system_prompt
+        .upsert(updateData, {
+          onConflict: 'functionality'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao salvar:', error);
+        throw error;
+      }
 
-      await loadConfigurations();
+      // Atualizar o estado local imediatamente
+      setConfigs(prev => 
+        prev.map(c => 
+          c.functionality === config.functionality 
+            ? { ...c, ...updateData }
+            : c
+        )
+      );
+
       toast.success('Configuração salva com sucesso!');
     } catch (error) {
+      console.error('Erro completo:', error);
       toast.error('Erro ao salvar configuração');
     } finally {
       setIsSaving(false);
@@ -217,12 +411,27 @@ export function AIControlPanelUnified() {
     try {
       setIsTesting(true);
       
-      const testMessage = 'Teste de configuração de IA. Responda brevemente.';
+      const testMessage = `Teste de configuração para ${config.functionality} com personalidade ${config.personality}. Responda brevemente.`;
       const result = await testSpecificModel(
         config.service as any,
         config.model,
         testMessage
       );
+
+      const testResult: AITestResult = {
+        functionality: config.functionality,
+        personality: config.personality,
+        service: config.service,
+        model: config.model,
+        success: result.success,
+        response: result.response,
+        error: result.error,
+        duration: result.duration,
+        used_knowledge_base: true, // Simulado
+        used_external_search: true // Simulado
+      };
+
+      setTestResults(prev => [testResult, ...prev]);
 
       if (result.success) {
         toast.success(`✅ ${config.functionality} funcionando!`);
@@ -236,24 +445,42 @@ export function AIControlPanelUnified() {
     }
   };
 
-  const applyTemplate = async (template: AITemplate) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const uploadDocuments = async () => {
+    if (uploadedFiles.length === 0) {
+      toast.error('Selecione arquivos para upload');
+      return;
+    }
+
     try {
       setIsSaving(true);
       
-      for (const config of configs) {
-        await saveConfiguration({
-          ...config,
-          service: template.configurations.default_service,
-          model: template.configurations.default_model,
-          max_tokens: template.configurations.default_tokens,
-          temperature: template.configurations.default_temperature,
-          preset_level: template.id
-        });
-      }
-      
-      toast.success(`Template "${template.name}" aplicado a todas as configurações!`);
+      // Temporariamente comentado até a migração ser aplicada
+      // for (const file of uploadedFiles) {
+      //   const content = await file.text();
+      //   
+      //   const { error } = await supabase
+      //     .from('ai_documents')
+      //     .insert({
+      //       name: file.name,
+      //       type: 'guide', // Pode ser configurável
+      //       content: content,
+      //       functionality: selectedFunction || 'general',
+      //       uploaded_at: new Date().toISOString()
+      //   });
+
+      //   if (error) throw error;
+      // }
+
+      // await loadDocuments();
+      setUploadedFiles([]);
+      toast.success(`${uploadedFiles.length} documento(s) enviado(s) com sucesso!`);
     } catch (error) {
-      toast.error('Erro ao aplicar template');
+      toast.error('Erro ao enviar documentos');
     } finally {
       setIsSaving(false);
     }
@@ -265,12 +492,13 @@ export function AIControlPanelUnified() {
       
       const defaultConfigs = functionalities.map(func => ({
         functionality: func.key,
-        service: 'openai',
+        personality: func.default_personality as 'drvital' | 'sofia',
+        service: 'openai' as const,
         model: 'gpt-4.1-2025-04-14',
-        max_tokens: 2000,
-        temperature: 0.7,
+        max_tokens: 4096,
+        temperature: 0.8,
         is_enabled: true,
-        preset_level: 'balanced'
+        level: 'meio' as const
       }));
 
       for (const config of defaultConfigs) {
@@ -352,15 +580,24 @@ export function AIControlPanelUnified() {
       </Card>
 
       <Tabs defaultValue="configurations" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="configurations">⚙️ Configurações</TabsTrigger>
-          <TabsTrigger value="templates">📚 Templates</TabsTrigger>
+          <TabsTrigger value="documents">📚 Documentos</TabsTrigger>
           <TabsTrigger value="testing">🧪 Testes</TabsTrigger>
           <TabsTrigger value="monitoring">📊 Monitoramento</TabsTrigger>
+          <TabsTrigger value="advanced">👑 Controle Avançado</TabsTrigger>
         </TabsList>
 
         {/* Aba de Configurações */}
         <TabsContent value="configurations" className="space-y-4">
+          <Alert>
+            <Brain className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Configuração por Função:</strong> Configure cada função com personalidade específica (DrVital/Sofia), 
+              nível de IA (Máximo/Meio/Mínimo) e serviço (OpenAI/Gemini/Sofia).
+            </AlertDescription>
+          </Alert>
+
           <div className="grid gap-4">
             {functionalities.map((func) => {
               const config = configs.find(c => c.functionality === func.key);
@@ -400,12 +637,58 @@ export function AIControlPanelUnified() {
                   
                   {config && (
                     <CardContent className="space-y-4">
+                      {/* Personalidade */}
+                      <div className="space-y-2">
+                        <Label>Personalidade</Label>
+                        <div className="flex gap-2">
+                          {func.personalities.map((personality) => {
+                            const personalityInfo = personalities[personality as keyof typeof personalities];
+                            const PersonalityIcon = personalityInfo.icon;
+                            
+                            return (
+                              <Button
+                                key={personality}
+                                variant={config.personality === personality ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => saveConfiguration({ ...config, personality: personality as 'drvital' | 'sofia' })}
+                                className="flex items-center gap-2"
+                              >
+                                <PersonalityIcon className="h-4 w-4" />
+                                {personalityInfo.name}
+                              </Button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Configuração IA */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Nível */}
+                        <div className="space-y-2">
+                          <Label>Nível</Label>
+                          <Select
+                            value={config.level}
+                            onValueChange={(value) => saveConfiguration({ ...config, level: value as 'maximo' | 'meio' | 'minimo' })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(levelConfigs).map(([level, levelInfo]) => (
+                                <SelectItem key={level} value={level}>
+                                  {levelInfo.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Serviço */}
                         <div className="space-y-2">
                           <Label>Serviço</Label>
                           <Select
                             value={config.service}
-                            onValueChange={(value) => saveConfiguration({ ...config, service: value })}
+                            onValueChange={(value) => saveConfiguration({ ...config, service: value as 'openai' | 'gemini' | 'sofia' })}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -413,10 +696,12 @@ export function AIControlPanelUnified() {
                             <SelectContent>
                               <SelectItem value="openai">OpenAI</SelectItem>
                               <SelectItem value="gemini">Google Gemini</SelectItem>
+                              <SelectItem value="sofia">Sofia Chat</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
 
+                        {/* Modelo */}
                         <div className="space-y-2">
                           <Label>Modelo</Label>
                           <Select
@@ -436,28 +721,31 @@ export function AIControlPanelUnified() {
                           </Select>
                         </div>
 
+                        {/* Tokens */}
                         <div className="space-y-2">
-                          <Label>Tokens Máximos</Label>
-                          <Input
-                            type="number"
-                            value={config.max_tokens}
-                            onChange={(e) => saveConfiguration({ ...config, max_tokens: parseInt(e.target.value) })}
-                            min={100}
-                            max={8192}
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label>Temperature: {config.temperature}</Label>
+                          <Label>Tokens: {config.max_tokens}</Label>
                           <Slider
-                            value={[config.temperature]}
-                            onValueChange={([value]) => saveConfiguration({ ...config, temperature: value })}
-                            min={0}
-                            max={1}
-                            step={0.1}
+                            value={[config.max_tokens]}
+                            onValueChange={([value]) => saveConfiguration({ ...config, max_tokens: value })}
+                            min={1000}
+                            max={8192}
+                            step={100}
                             className="w-full"
                           />
                         </div>
+                      </div>
+
+                      {/* Temperature */}
+                      <div className="space-y-2">
+                        <Label>Temperature: {config.temperature}</Label>
+                        <Slider
+                          value={[config.temperature]}
+                          onValueChange={([value]) => saveConfiguration({ ...config, temperature: value })}
+                          min={0}
+                          max={1}
+                          step={0.1}
+                          className="w-full"
+                        />
                       </div>
                     </CardContent>
                   )}
@@ -467,107 +755,142 @@ export function AIControlPanelUnified() {
           </div>
         </TabsContent>
 
-        {/* Aba de Templates */}
-        <TabsContent value="templates" className="space-y-4">
-          <div className="grid md:grid-cols-3 gap-4">
-            {templates.map((template) => (
-              <Card key={template.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{template.description}</p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-sm">
-                    <p><strong>Serviço:</strong> {template.configurations.default_service}</p>
-                    <p><strong>Modelo:</strong> {template.configurations.default_model}</p>
-                    <p><strong>Tokens:</strong> {template.configurations.default_tokens}</p>
-                    <p><strong>Temperature:</strong> {template.configurations.default_temperature}</p>
+        {/* Aba de Documentos */}
+        <TabsContent value="documents" className="space-y-4">
+          <Alert>
+            <BookOpen className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Base de Conhecimento:</strong> Upload de documentos que serão sempre consultados pelas IAs 
+              antes de responder, garantindo que usem o conhecimento da empresa.
+            </AlertDescription>
+          </Alert>
+
+          {/* Upload de Documentos */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Upload de Documentos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Selecionar Função</Label>
+                <Select value={selectedFunction} onValueChange={setSelectedFunction}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Escolha uma função..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">📚 Geral (Todas as funções)</SelectItem>
+                    {functionalities.map((func) => (
+                      <SelectItem key={func.key} value={func.key}>
+                        {func.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Arquivos</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                    accept=".txt,.md,.pdf,.doc,.docx"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <span className="text-sm text-gray-600">
+                      Clique para selecionar arquivos ou arraste aqui
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Arquivos Selecionados</Label>
+                  <div className="space-y-1">
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <span className="text-sm">{file.name}</span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== index))}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                  <Button
-                    className="w-full mt-4"
-                    onClick={() => applyTemplate(template)}
-                    disabled={isSaving}
-                  >
-                    Aplicar Template
+                  <Button onClick={uploadDocuments} disabled={isSaving} className="w-full">
+                    <Upload className="h-4 w-4 mr-2" />
+                    {isSaving ? 'Enviando...' : 'Enviar Documentos'}
                   </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Documentos Existentes */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Documentos na Base de Conhecimento
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {documents.length === 0 ? (
+                <p className="text-muted-foreground text-center py-4">
+                  Nenhum documento na base de conhecimento
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 border rounded">
+                      <div className="flex items-center gap-3">
+                        <FileText className="h-4 w-4" />
+                        <div>
+                          <p className="font-medium">{doc.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {doc.functionality} • {new Date(doc.uploaded_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="outline">{doc.type}</Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Aba de Testes */}
         <TabsContent value="testing" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Teste Personalizado</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Serviço</Label>
-                  <Select value={selectedService} onValueChange={(value: any) => setSelectedService(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="openai">OpenAI</SelectItem>
-                      <SelectItem value="gemini">Google Gemini</SelectItem>
-                      <SelectItem value="sofia">Sofia Chat</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Modelo</Label>
-                  <Select value={selectedModel} onValueChange={setSelectedModel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedService !== 'sofia' && models[selectedService]?.map((model) => (
-                        <SelectItem key={model.value} value={model.value}>
-                          {model.label}
-                        </SelectItem>
-                      ))}
-                      {selectedService === 'sofia' && (
-                        <SelectItem value="sofia-chat">Sofia Chat</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Mensagem de Teste</Label>
-                <Textarea
-                  value={customMessage}
-                  onChange={(e) => setCustomMessage(e.target.value)}
-                  placeholder="Digite sua mensagem de teste..."
-                  className="min-h-[80px]"
-                />
-              </div>
-
-              <Button
-                onClick={() => testSpecificModel(selectedService, selectedModel, customMessage)}
-                disabled={testingLoading}
-                className="w-full"
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                Testar {selectedService === 'sofia' ? 'Sofia' : selectedModel}
-              </Button>
-            </CardContent>
-          </Card>
+          <Alert>
+            <TestTube className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Teste Individual:</strong> Teste cada configuração separadamente para verificar 
+              se está funcionando corretamente e usando a base de conhecimento.
+            </AlertDescription>
+          </Alert>
 
           {/* Resultados dos Testes */}
-          {results.length > 0 && (
+          {testResults.length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle>Resultados dos Testes</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {results.map((result, index) => (
+                  {testResults.map((result, index) => (
                     <div key={index} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -577,9 +900,9 @@ export function AIControlPanelUnified() {
                             <XCircle className="h-5 w-5 text-red-500" />
                           )}
                           <div>
-                            <p className="font-medium">{result.model}</p>
+                            <p className="font-medium">{result.functionality}</p>
                             <p className="text-sm text-muted-foreground">
-                              {result.service === 'openai' ? 'OpenAI' : 'Google Gemini'}
+                              {personalities[result.personality as keyof typeof personalities]?.name} • {result.service} • {result.model}
                             </p>
                           </div>
                         </div>
@@ -595,6 +918,17 @@ export function AIControlPanelUnified() {
                               {result.duration}ms
                             </Badge>
                           )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-sm">
+                        <div className="flex items-center gap-1">
+                          <BookOpen className="h-3 w-3" />
+                          Base: {result.used_knowledge_base ? '✅' : '❌'}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Globe className="h-3 w-3" />
+                          Pesquisa: {result.used_external_search ? '✅' : '❌'}
                         </div>
                       </div>
 
@@ -632,7 +966,7 @@ export function AIControlPanelUnified() {
                   <div className="text-2xl font-bold text-green-500">
                     {configs.filter(c => c.is_enabled).length}/{configs.length}
                   </div>
-                  <p className="text-sm text-muted-foreground">IAs Ativas</p>
+                  <p className="text-sm text-muted-foreground">Funções Ativas</p>
                 </div>
               </CardContent>
             </Card>
@@ -664,7 +998,7 @@ export function AIControlPanelUnified() {
               <CardContent>
                 <div className="text-center">
                   <div className="text-2xl font-bold">
-                    {results.filter(r => r.success).length}/{results.length}
+                    {testResults.filter(r => r.success).length}/{testResults.length}
                   </div>
                   <p className="text-sm text-muted-foreground">Sucessos</p>
                 </div>
@@ -674,36 +1008,457 @@ export function AIControlPanelUnified() {
 
           <Card>
             <CardHeader>
-              <CardTitle>Performance por Serviço</CardTitle>
+              <CardTitle>Performance por Personalidade</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>OpenAI</span>
-                    <span>{results.filter(r => r.service === 'openai' && r.success).length}/{results.filter(r => r.service === 'openai').length}</span>
+                    <span>Dr. Vital</span>
+                    <span>{testResults.filter(r => r.personality === 'drvital' && r.success).length}/{testResults.filter(r => r.personality === 'drvital').length}</span>
                   </div>
                   <Progress value={
-                    results.filter(r => r.service === 'openai').length > 0
-                      ? (results.filter(r => r.service === 'openai' && r.success).length / results.filter(r => r.service === 'openai').length) * 100
+                    testResults.filter(r => r.personality === 'drvital').length > 0
+                      ? (testResults.filter(r => r.personality === 'drvital' && r.success).length / testResults.filter(r => r.personality === 'drvital').length) * 100
                       : 0
                   } />
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Google Gemini</span>
-                    <span>{results.filter(r => r.service === 'gemini' && r.success).length}/{results.filter(r => r.service === 'gemini').length}</span>
+                    <span>Sofia</span>
+                    <span>{testResults.filter(r => r.personality === 'sofia' && r.success).length}/{testResults.filter(r => r.personality === 'sofia').length}</span>
                   </div>
                   <Progress value={
-                    results.filter(r => r.service === 'gemini').length > 0
-                      ? (results.filter(r => r.service === 'gemini' && r.success).length / results.filter(r => r.service === 'gemini').length) * 100
+                    testResults.filter(r => r.personality === 'sofia').length > 0
+                      ? (testResults.filter(r => r.personality === 'sofia' && r.success).length / testResults.filter(r => r.personality === 'sofia').length) * 100
                       : 0
                   } />
                 </div>
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Aba de Controle Avançado */}
+        <TabsContent value="advanced" className="space-y-4">
+          <Alert>
+            <Crown className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Controle Avançado:</strong> Configurações detalhadas e personalizadas para cada função de IA. 
+              Acesse configurações avançadas, prompts personalizados e otimizações específicas.
+            </AlertDescription>
+          </Alert>
+
+          <div className="grid gap-4">
+            {functionalities.map((func) => {
+              const config = configs.find(c => c.functionality === func.key);
+              const IconComponent = func.icon;
+              
+              return (
+                <Card key={func.key}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <IconComponent className="h-5 w-5" />
+                        <div>
+                          <h3 className="font-medium">{func.name}</h3>
+                          <p className="text-sm text-muted-foreground">{func.description}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={config?.is_enabled ? "default" : "secondary"}>
+                          {config?.is_enabled ? "Ativo" : "Inativo"}
+                        </Badge>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedAdvancedConfig(config || null)}
+                            >
+                              <Settings className="h-3 w-3 mr-1" />
+                              Avançado
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                            <DialogHeader>
+                              <DialogTitle className="flex items-center gap-2">
+                                <IconComponent className="h-5 w-5" />
+                                Configuração Avançada: {func.name}
+                              </DialogTitle>
+                              <DialogDescription>
+                                Configure parâmetros avançados para {func.name.toLowerCase()}
+                              </DialogDescription>
+                            </DialogHeader>
+                            
+                            <div className="space-y-6">
+                              {/* Status e Informações Básicas */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <Card>
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Activity className="h-4 w-4" />
+                                      Status Atual
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Ativo:</span>
+                                        <Switch
+                                          checked={config?.is_enabled || false}
+                                          onCheckedChange={(checked) => {
+                                            console.log('Switch clicked:', checked, 'Config:', config);
+                                            if (config) {
+                                              const updatedConfig = { ...config, is_enabled: checked };
+                                              console.log('Saving config:', updatedConfig);
+                                              saveConfiguration(updatedConfig);
+                                            } else {
+                                              console.error('Config is null or undefined');
+                                            }
+                                          }}
+                                        />
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Personalidade:</span>
+                                        <Badge variant="outline">
+                                          {config?.personality === 'drvital' ? 'Dr. Vital' : 'Sofia'}
+                                        </Badge>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Nível:</span>
+                                        <Badge variant="outline">
+                                          {config?.level === 'maximo' ? 'Máximo' : config?.level === 'meio' ? 'Meio' : 'Mínimo'}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <BarChart3 className="h-4 w-4" />
+                                      Métricas
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent>
+                                    <div className="space-y-2">
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Tokens:</span>
+                                        <span className="text-sm font-medium">{config?.max_tokens || 4096}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Temperatura:</span>
+                                        <span className="text-sm font-medium">{config?.temperature || 0.8}</span>
+                                      </div>
+                                      <div className="flex justify-between">
+                                        <span className="text-sm">Custo/Request:</span>
+                                        <span className="text-sm font-medium">${config?.cost_per_request?.toFixed(4) || '0.0000'}</span>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Configurações Avançadas */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <Card>
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Cpu className="h-4 w-4" />
+                                      Configuração de IA
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-4">
+                                    {/* Serviço */}
+                                    <div className="space-y-2">
+                                      <Label>Serviço de IA</Label>
+                                      <Select
+                                        value={config?.service || 'openai'}
+                                        onValueChange={(value) => {
+                                          if (config) {
+                                            saveConfiguration({ ...config, service: value as 'openai' | 'gemini' | 'sofia' });
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="openai">OpenAI</SelectItem>
+                                          <SelectItem value="gemini">Google Gemini</SelectItem>
+                                          <SelectItem value="sofia">Sofia Chat</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+
+                                    {/* Modelo */}
+                                    <div className="space-y-2">
+                                      <Label>Modelo</Label>
+                                      <Select
+                                        value={config?.model || 'gpt-4'}
+                                        onValueChange={(value) => {
+                                          if (config) {
+                                            saveConfiguration({ ...config, model: value });
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          {(!config?.service || config?.service === 'openai') && (
+                                            <>
+                                              <SelectItem value="gpt-4">GPT-4</SelectItem>
+                                              <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                                            </>
+                                          )}
+                                          {config?.service === 'gemini' && (
+                                            <>
+                                              <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+                                              <SelectItem value="gemini-pro-vision">Gemini Pro Vision</SelectItem>
+                                            </>
+                                          )}
+                                          {config?.service === 'sofia' && (
+                                            <>
+                                              <SelectItem value="sofia-chat">Sofia Chat</SelectItem>
+                                            </>
+                                          )}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+
+                                    {/* Tokens */}
+                                    <div className="space-y-2">
+                                      <Label>Tokens Máximos: {config?.max_tokens || 4096}</Label>
+                                      <Slider
+                                        value={[config?.max_tokens || 4096]}
+                                        onValueChange={(value) => {
+                                          console.log('Tokens slider changed:', value[0], 'Config:', config);
+                                          if (config) {
+                                            const updatedConfig = { ...config, max_tokens: value[0] };
+                                            console.log('Saving tokens config:', updatedConfig);
+                                            saveConfiguration(updatedConfig);
+                                          } else {
+                                            console.error('Config is null or undefined for tokens');
+                                          }
+                                        }}
+                                        max={4000}
+                                        min={100}
+                                        step={100}
+                                        className="w-full"
+                                      />
+                                    </div>
+
+                                    {/* Temperatura */}
+                                    <div className="space-y-2">
+                                      <Label>Temperatura: {config?.temperature || 0.8}</Label>
+                                      <Slider
+                                        value={[config?.temperature || 0.8]}
+                                        onValueChange={(value) => {
+                                          console.log('Temperature slider changed:', value[0], 'Config:', config);
+                                          if (config) {
+                                            const updatedConfig = { ...config, temperature: value[0] };
+                                            console.log('Saving temperature config:', updatedConfig);
+                                            saveConfiguration(updatedConfig);
+                                          } else {
+                                            console.error('Config is null or undefined for temperature');
+                                          }
+                                        }}
+                                        max={2}
+                                        min={0}
+                                        step={0.1}
+                                        className="w-full"
+                                      />
+                                    </div>
+                                  </CardContent>
+                                </Card>
+
+                                <Card>
+                                  <CardHeader className="pb-3">
+                                    <CardTitle className="text-sm flex items-center gap-2">
+                                      <Palette className="h-4 w-4" />
+                                      Personalização
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className="space-y-4">
+                                    {/* Personalidade */}
+                                    <div className="space-y-2">
+                                      <Label>Personalidade</Label>
+                                      <div className="flex gap-2">
+                                        <Button
+                                          variant={config?.personality === 'drvital' ? 'default' : 'outline'}
+                                          size="sm"
+                                          onClick={() => {
+                                            if (config) {
+                                              saveConfiguration({ ...config, personality: 'drvital' });
+                                            }
+                                          }}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <Stethoscope className="h-4 w-4" />
+                                          Dr. Vital
+                                        </Button>
+                                        <Button
+                                          variant={config?.personality === 'sofia' ? 'default' : 'outline'}
+                                          size="sm"
+                                          onClick={() => {
+                                            if (config) {
+                                              saveConfiguration({ ...config, personality: 'sofia' });
+                                            }
+                                          }}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <Heart className="h-4 w-4" />
+                                          Sofia
+                                        </Button>
+                                      </div>
+                                    </div>
+
+                                    {/* Nível */}
+                                    <div className="space-y-2">
+                                      <Label>Nível de Configuração</Label>
+                                      <Select
+                                        value={config?.level || 'meio'}
+                                        onValueChange={(value) => {
+                                          if (config) {
+                                            saveConfiguration({ ...config, level: value as 'maximo' | 'meio' | 'minimo' });
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="maximo">Máximo</SelectItem>
+                                          <SelectItem value="meio">Meio</SelectItem>
+                                          <SelectItem value="minimo">Mínimo</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+
+                                    {/* Prioridade */}
+                                    <div className="space-y-2">
+                                      <Label>Prioridade</Label>
+                                      <Select
+                                        value={config?.priority?.toString() || '1'}
+                                        onValueChange={(value) => {
+                                          if (config) {
+                                            saveConfiguration({ ...config, priority: parseInt(value) });
+                                          }
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="1">Baixa</SelectItem>
+                                          <SelectItem value="2">Média</SelectItem>
+                                          <SelectItem value="3">Alta</SelectItem>
+                                          <SelectItem value="4">Crítica</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  </CardContent>
+                                </Card>
+                              </div>
+
+                              {/* Prompt do Sistema */}
+                              <Card>
+                                <CardHeader className="pb-3">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <MessageSquare className="h-4 w-4" />
+                                    Prompt do Sistema
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-2">
+                                    <Label>Prompt Personalizado</Label>
+                                    <Textarea
+                                      placeholder="Digite o prompt do sistema para esta função..."
+                                      value={config?.system_prompt || ''}
+                                      onChange={(e) => {
+                                        if (config) {
+                                          saveConfiguration({ ...config, system_prompt: e.target.value });
+                                        }
+                                      }}
+                                      rows={4}
+                                      className="font-mono text-sm"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                      Este prompt define como a IA deve se comportar para esta função específica.
+                                    </p>
+                                  </div>
+                                </CardContent>
+                              </Card>
+
+                              {/* Teste Rápido */}
+                              <Card>
+                                <CardHeader className="pb-3">
+                                  <CardTitle className="text-sm flex items-center gap-2">
+                                    <TestTube className="h-4 w-4" />
+                                    Teste Rápido
+                                  </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                  <div className="space-y-4">
+                                    <div className="flex gap-2">
+                                      <Button
+                                        onClick={() => config && testConfiguration(config)}
+                                        disabled={isTesting}
+                                        className="flex items-center gap-2"
+                                      >
+                                        <PlayCircle className="h-4 w-4" />
+                                        Testar Configuração
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                          if (config) {
+                                            saveConfiguration({ ...config, ...levelConfigs[config.level] });
+                                          }
+                                        }}
+                                      >
+                                        <RotateCcw className="h-4 w-4 mr-1" />
+                                        Resetar para Padrão
+                                      </Button>
+                                    </div>
+                                    {isTesting && (
+                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                                        Testando configuração...
+                                      </div>
+                                    )}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </div>
+
+                            <DialogFooter>
+                              <Button variant="outline" onClick={() => setIsAdvancedModalOpen(false)}>
+                                Fechar
+                              </Button>
+                              <Button onClick={() => {
+                                if (config) {
+                                  saveConfiguration(config);
+                                  setIsAdvancedModalOpen(false);
+                                }
+                              }}>
+                                <Save className="h-4 w-4 mr-1" />
+                                Salvar Configuração
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </div>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

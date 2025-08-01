@@ -66,7 +66,22 @@ export const useChallengeParticipation = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Se for erro de chave duplicada, buscar a participação existente
+        if (error.code === '23505' && error.message.includes('challenge_participations_challenge_id_user_id_key')) {
+          const { data: existingParticipation, error: fetchError } = await supabase
+            .from('challenge_participations')
+            .select('id, progress, is_completed')
+            .eq('user_id', user.id)
+            .eq('challenge_id', challengeId)
+            .single();
+
+          if (!fetchError && existingParticipation) {
+            throw new Error(`Você já está participando deste desafio (${existingParticipation.progress}% concluído)`);
+          }
+        }
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {

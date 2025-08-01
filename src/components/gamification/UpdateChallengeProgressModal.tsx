@@ -130,11 +130,29 @@ export const UpdateChallengeProgressModal = ({
         return;
       }
 
-      // Temporário - simular update até tipos serem atualizados
-      console.log('Updating progress:', progressPercentage);
-      
-      // Simular sucesso
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Buscar participação do usuário
+      const { data: participationData, error: participationError } = await supabase
+        .from('challenge_participations')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('challenge_id', effectiveChallenge.id)
+        .single();
+
+      if (participationError) {
+        throw new Error('Participação não encontrada. Participe do desafio primeiro.');
+      }
+
+      // Atualizar progresso usando a função do banco
+      const { data: updateResult, error: updateError } = await supabase
+        .rpc('update_challenge_progress', {
+          participation_id: participationData.id,
+          new_progress: newValue,
+          notes: notes || `Progresso atualizado: ${newValue} ${effectiveChallenge.unit}`
+        });
+
+      if (updateError) {
+        throw updateError;
+      }
 
       if (isCompleted) {
         celebrateWithEffects();
@@ -152,11 +170,11 @@ export const UpdateChallengeProgressModal = ({
 
       setOpen(false);
       onUpdate?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao atualizar progresso:', error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o progresso.",
+        description: error.message || "Não foi possível atualizar o progresso.",
         variant: "destructive"
       });
     } finally {

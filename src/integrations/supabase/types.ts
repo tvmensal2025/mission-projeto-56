@@ -16,48 +16,82 @@ export type Database = {
     Tables: {
       ai_configurations: {
         Row: {
-          created_at: string | null
-          functionality: string
           id: string
-          is_active: boolean | null
-          is_enabled: boolean | null
-          max_tokens: number | null
-          model: string
-          preset_level: string | null
+          functionality: string
           service: string
+          model: string
+          max_tokens: number
+          temperature: number
+          is_enabled: boolean
           system_prompt: string | null
-          temperature: number | null
-          updated_at: string | null
+          personality: string
+          level: string
+          cost_per_request: number
+          priority: number
+          created_at: string
+          updated_at: string
         }
         Insert: {
-          created_at?: string | null
-          functionality: string
           id?: string
-          is_active?: boolean | null
-          is_enabled?: boolean | null
-          max_tokens?: number | null
-          model?: string
-          preset_level?: string | null
+          functionality: string
           service?: string
+          model?: string
+          max_tokens?: number
+          temperature?: number
+          is_enabled?: boolean
           system_prompt?: string | null
-          temperature?: number | null
-          updated_at?: string | null
+          personality?: string
+          level?: string
+          cost_per_request?: number
+          priority?: number
+          created_at?: string
+          updated_at?: string
         }
         Update: {
-          created_at?: string | null
-          functionality?: string
           id?: string
-          is_active?: boolean | null
-          is_enabled?: boolean | null
-          max_tokens?: number | null
-          model?: string
-          preset_level?: string | null
+          functionality?: string
           service?: string
+          model?: string
+          max_tokens?: number
+          temperature?: number
+          is_enabled?: boolean
           system_prompt?: string | null
-          temperature?: number | null
-          updated_at?: string | null
+          personality?: string
+          level?: string
+          cost_per_request?: number
+          priority?: number
+          created_at?: string
+          updated_at?: string
         }
-        Relationships: []
+      }
+      ai_documents: {
+        Row: {
+          id: string
+          name: string
+          type: string
+          content: string
+          functionality: string
+          uploaded_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          type?: string
+          content: string
+          functionality?: string
+          uploaded_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          type?: string
+          content?: string
+          functionality?: string
+          uploaded_at?: string
+          created_at?: string
+        }
       }
       assessments: {
         Row: {
@@ -1158,54 +1192,38 @@ export type Database = {
       }
       profiles: {
         Row: {
-          admin_level: string | null
-          age: number | null
+          id: string
+          email: string
+          full_name: string | null
           avatar_url: string | null
+          phone: string | null
           birth_date: string | null
           city: string | null
           created_at: string
-          email: string | null
-          full_name: string | null
-          gender: string | null
-          id: string
-          phone: string | null
-          role: string | null
           updated_at: string
-          user_id: string | null
         }
         Insert: {
-          admin_level?: string | null
-          age?: number | null
+          id: string
+          email: string
+          full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           birth_date?: string | null
           city?: string | null
           created_at?: string
-          email?: string | null
-          full_name?: string | null
-          gender?: string | null
-          id?: string
-          phone?: string | null
-          role?: string | null
           updated_at?: string
-          user_id?: string | null
         }
         Update: {
-          admin_level?: string | null
-          age?: number | null
+          id?: string
+          email?: string
+          full_name?: string | null
           avatar_url?: string | null
+          phone?: string | null
           birth_date?: string | null
           city?: string | null
           created_at?: string
-          email?: string | null
-          full_name?: string | null
-          gender?: string | null
-          id?: string
-          phone?: string | null
-          role?: string | null
           updated_at?: string
-          user_id?: string | null
         }
-        Relationships: []
       }
       sessions: {
         Row: {

@@ -58,6 +58,9 @@ import { AbundanceWheelPage } from "./pages/AbundanceWheelPage";
 import { CompetencyWheelPage } from "./pages/CompetencyWheelPage";
 import { GalileuChartsPage } from "./pages/GalileuChartsPage";
 import ChallengeDetailPage from "./pages/ChallengeDetailPage";
+import DrVitalPage from "./pages/DrVitalPage";
+import UserDrVitalPage from "./pages/UserDrVitalPage";
+import UpdateChallengeProgressPage from "./pages/UpdateChallengeProgressPage";
 
 // Componente para lidar com autenticação na rota de sessões
 const SessionRoute = () => {
@@ -158,6 +161,9 @@ const App: React.FC = () => {
             <Route path="/app/abundance-wheel" element={<AbundanceWheelPage />} />
             <Route path="/app/competency-wheel" element={<CompetencyWheelPage />} />
             <Route path="/challenge/:challengeId" element={<ChallengeDetailPage />} />
+            <Route path="/update-challenge/:challengeId" element={<UpdateChallengeProgressPage user={null} />} />
+            <Route path="/dr-vital" element={<DrVitalPage />} />
+            <Route path="/user-dr-vital" element={<UserDrVitalPage />} />
             
             {/* Standalone pages */}
             <Route path="/index" element={<Index />} />

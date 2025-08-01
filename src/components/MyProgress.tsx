@@ -90,12 +90,12 @@ const MyProgress: React.FC = () => {
         variants={cardVariants}
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-800 stat-card-responsive">
           <CardContent className="mobile-padding text-center">
             <div className="flex items-center justify-center mb-2">
               <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div className="mobile-stat-number text-blue-700 dark:text-blue-300">
+            <div className="stat-number-responsive text-blue-700 dark:text-blue-300">
               {weeklyStats.totalSteps.toLocaleString()}
             </div>
             <div className="text-xs lg:text-sm text-blue-600 dark:text-blue-400">Passos esta semana</div>
@@ -103,12 +103,12 @@ const MyProgress: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800">
+        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200 dark:border-orange-800 stat-card-responsive">
           <CardContent className="mobile-padding text-center">
             <div className="flex items-center justify-center mb-2">
               <Activity className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
-            <div className="mobile-stat-number text-orange-700 dark:text-orange-300">
+            <div className="stat-number-responsive text-orange-700 dark:text-orange-300">
               {weeklyStats.totalCalories}
             </div>
             <div className="text-xs lg:text-sm text-orange-600 dark:text-orange-400">Calorias queimadas</div>
@@ -116,12 +116,12 @@ const MyProgress: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200 dark:border-green-800 stat-card-responsive">
           <CardContent className="mobile-padding text-center">
             <div className="flex items-center justify-center mb-2">
               <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-            <div className="mobile-stat-number text-green-700 dark:text-green-300">
+            <div className="stat-number-responsive text-green-700 dark:text-green-300">
               {weeklyStats.totalDistance.toFixed(1)} km
             </div>
             <div className="text-xs lg:text-sm text-green-600 dark:text-green-400">Distância percorrida</div>
@@ -129,12 +129,12 @@ const MyProgress: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-800 stat-card-responsive">
           <CardContent className="mobile-padding text-center">
             <div className="flex items-center justify-center mb-2">
               <Activity className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
-            <div className="mobile-stat-number text-purple-700 dark:text-purple-300">
+            <div className="stat-number-responsive text-purple-700 dark:text-purple-300">
               {weeklyStats.avgHeartRate}
             </div>
             <div className="text-xs lg:text-sm text-purple-600 dark:text-purple-400">BPM médio</div>
@@ -154,44 +154,44 @@ const MyProgress: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-primary">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-primary">
                   {weeklyStats.totalSteps.toLocaleString()}
                 </div>
                 <div className="text-xs text-muted-foreground">Passos Totais</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-orange-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-orange-600">
                   {weeklyStats.totalCalories}
                 </div>
                 <div className="text-xs text-muted-foreground">Calorias</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-green-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-green-600">
                   {weeklyStats.totalDistance.toFixed(1)} km
                 </div>
                 <div className="text-xs text-muted-foreground">Distância</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-red-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-red-600">
                   {weeklyStats.avgHeartRate}
                 </div>
                 <div className="text-xs text-muted-foreground">BPM Médio</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-purple-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-purple-600">
                   {weeklyStats.totalActiveMinutes}
                 </div>
                 <div className="text-xs text-muted-foreground">Min. Ativos</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-blue-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-blue-600">
                   {weeklyStats.avgSleepDuration.toFixed(1)}h
                 </div>
                 <div className="text-xs text-muted-foreground">Sono Médio</div>
               </div>
-              <div className="text-center mobile-padding bg-background rounded-lg border">
-                <div className="mobile-text-lg font-bold text-indigo-600">
+              <div className="text-center mobile-padding bg-background rounded-lg border min-h-[80px] flex flex-col justify-center">
+                <div className="stat-number-responsive text-indigo-600">
                   {weeklyStats.workoutFrequency}
                 </div>
                 <div className="text-xs text-muted-foreground">Treinos</div>

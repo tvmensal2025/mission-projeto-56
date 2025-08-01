@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Heart, LogOut, Trophy, Target, Calendar, Activity, Smartphone, Bell, Users, BookOpen, TestTube, MessageCircle } from "lucide-react";
 import { NotificationBell } from "@/components/NotificationBell";
 import SessionsPage from "@/components/SessionsPage";
-import ChallengesSection from "@/components/dashboard/ChallengesSection";
+
 
 import RankingPage from "@/components/RankingPage";
 import { HealthChatBot } from "@/components/HealthChatBot";
@@ -173,8 +173,7 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 sm:gap-8">
           {/* Conteúdo Principal */}
           <div className="xl:col-span-3 space-y-6 sm:space-y-8">
-            {/* Seção de Desafios */}
-            <ChallengesSection user={user} />
+
 
           {/* Quick Actions - Grid Responsivo */}
           <Card className="health-card">

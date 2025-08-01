@@ -74,11 +74,11 @@ export function useGoogleFitData() {
 
     return {
       totalSteps: data.reduce((sum, d) => sum + (d.steps_count || 0), 0),
-      totalDistance: data.reduce((sum, d) => sum + (d.distance_meters || 0), 0) / 1000,
+      totalDistance: Math.round((data.reduce((sum, d) => sum + (d.distance_meters || 0), 0) / 1000) * 10) / 10,
       totalCalories: data.reduce((sum, d) => sum + (d.calories_burned || 0), 0),
-      avgHeartRate: data.reduce((sum, d) => sum + (d.heart_rate_avg || 0), 0) / data.length,
+      avgHeartRate: Math.round(data.reduce((sum, d) => sum + (d.heart_rate_avg || 0), 0) / data.length),
       totalActiveMinutes: data.reduce((sum, d) => sum + (d.active_minutes || 0), 0),
-      avgSleepDuration: data.reduce((sum, d) => sum + (d.sleep_duration_minutes || 0), 0) / data.length / 60,
+      avgSleepDuration: Math.round((data.reduce((sum, d) => sum + (d.sleep_duration_minutes || 0), 0) / data.length / 60) * 10) / 10,
       workoutFrequency: Math.floor(Math.random() * 3) + 3
     };
   };

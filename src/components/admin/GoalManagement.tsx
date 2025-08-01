@@ -46,7 +46,7 @@ export function GoalManagement() {
           try {
             const { data: profileData, error: profileError } = await supabase
               .from('profiles')
-              .select('full_name, email')
+              .select('full_name,email')
               .eq('user_id', goal.user_id)
               .single();
 

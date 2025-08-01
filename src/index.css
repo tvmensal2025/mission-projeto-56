@@ -262,15 +262,15 @@
 
 /* Responsividade móvel - números maiores e botões grandes */
 .mobile-text-lg {
-  @apply text-xl md:text-2xl;
+  @apply text-xl md:text-2xl break-words overflow-hidden;
 }
 
 .mobile-text-xl {
-  @apply text-2xl md:text-3xl;
+  @apply text-2xl md:text-3xl break-words overflow-hidden;
 }
 
 .mobile-text-2xl {
-  @apply text-3xl md:text-4xl;
+  @apply text-3xl md:text-4xl break-words overflow-hidden;
 }
 
 .mobile-weight-display {
@@ -304,7 +304,7 @@
 }
 
 .mobile-stat-number {
-  @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+  @apply text-3xl md:text-4xl lg:text-5xl font-bold break-words overflow-hidden;
 }
 
 /* Mobile chat optimizations */
@@ -344,6 +344,15 @@
 
 .mobile-grid-4 {
   @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6;
+}
+
+/* Cards de estatísticas responsivos */
+.stat-card-responsive {
+  @apply min-h-[120px] md:min-h-[140px] p-4 md:p-6;
+}
+
+.stat-number-responsive {
+  @apply text-2xl sm:text-3xl md:text-4xl font-bold break-words overflow-hidden leading-tight;
 }
 
 /* Hide Lovable elements */

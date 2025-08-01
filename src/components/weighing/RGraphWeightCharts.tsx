@@ -196,25 +196,25 @@ const RGraphWeightCharts: React.FC = () => {
         <CardContent className="p-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-1">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                 {stats.currentWeight}
               </div>
               <div className="text-sm text-muted-foreground">Peso Atual (kg)</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-1">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                 {stats.currentIMC}
               </div>
               <div className="text-sm text-muted-foreground">IMC</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-1">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                 {stats.weightChange}
               </div>
               <div className="text-sm text-muted-foreground">Mudança (kg)</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-1">
+              <div className="text-2xl sm:text-3xl font-bold text-primary mb-1">
                 {measurements.length}
               </div>
               <div className="text-sm text-muted-foreground">Medições</div>

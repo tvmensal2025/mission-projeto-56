@@ -31,12 +31,12 @@ export const WaterTrackingWidget = () => {
         <div className="text-center space-y-3">
           <div className="relative">
             <motion.div
-              className="text-3xl font-bold text-blue-600 dark:text-blue-400"
+              className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400"
               animate={{ scale: isGoalReached ? [1, 1.1, 1] : 1 }}
               transition={{ duration: 0.5 }}
             >
               {water.todayTotal}
-              <span className="text-lg text-muted-foreground">/{water.goal}</span>
+              <span className="text-base sm:text-lg text-muted-foreground">/{water.goal}</span>
             </motion.div>
             <p className="text-sm text-muted-foreground">copos de água</p>
           </div>

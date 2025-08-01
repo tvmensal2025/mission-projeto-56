@@ -173,7 +173,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.2 }}
-              className="text-3xl font-bold text-foreground"
+              className="text-2xl sm:text-3xl font-bold text-foreground"
             >
               {formatNumber(timeLeft.days)}
             </motion.div>
@@ -187,7 +187,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.2 }}
-              className={`text-3xl font-bold ${
+              className={`text-2xl sm:text-3xl font-bold ${
                 urgencyLevel === 'critical' ? 'text-red-500' : 
                 urgencyLevel === 'urgent' ? 'text-orange-500' : 'text-foreground'
               }`}
@@ -204,7 +204,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.2 }}
-              className="text-3xl font-bold text-foreground"
+              className="text-2xl sm:text-3xl font-bold text-foreground"
             >
               {formatNumber(timeLeft.minutes)}
             </motion.div>
@@ -218,7 +218,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.2 }}
-              className="text-3xl font-bold text-foreground"
+              className="text-2xl sm:text-3xl font-bold text-foreground"
             >
               {formatNumber(timeLeft.seconds)}
             </motion.div>

@@ -12,6 +12,9 @@ import { Slider } from '@/components/ui/slider';
 import { Camera, FileText, TrendingUp, Target, Award, Share2, Users, Heart, Upload, X, Image as ImageIcon, Video, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCommunityShare } from '@/hooks/useCommunityShare';
+import { useConfetti, ConfettiAnimation } from '@/components/gamification/ConfettiAnimation';
+import { useAlternatingEffects, VisualEffectsManager } from '@/components/gamification/VisualEffectsManager';
+import { useBalloonFireworks, BalloonFireworksEffect } from '@/components/gamification/BalloonFireworksEffect';
 
 interface Goal {
   id: string;
@@ -40,6 +43,10 @@ export const UpdateProgressModal = ({ goal, onUpdate, children }: UpdateProgress
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { shareToHealthFeed, generateProgressMessage, suggestTags, isSharing } = useCommunityShare();
+  const { trigger, celebrate } = useConfetti();
+  const { trigger: effectTrigger, currentEffect, celebrateWithEffects } = useAlternatingEffects();
+  const { trigger: balloonTrigger, celebrate: celebrateBalloon } = useBalloonFireworks();
+
 
   const calculateProgress = (value: number) => {
     if (!goal.target_value || goal.target_value === 0) return 0;
@@ -215,12 +222,23 @@ export const UpdateProgressModal = ({ goal, onUpdate, children }: UpdateProgress
         await shareToHealthFeed(shareData);
       }
 
-      toast({
-        title: isCompleted ? "🎉 Meta Concluída!" : "✅ Progresso Atualizado!",
-        description: isCompleted 
-          ? `Parabéns! Você completou: ${goal.title}`
-          : `Progresso atualizado para ${newValue} ${goal.unit}`,
-      });
+      // Efeitos de celebração - SEMPRE aparecem quando atualizar meta
+      // Efeitos de celebração - SEMPRE aparecem quando atualizar meta
+      celebrateWithEffects();
+      celebrate();
+      celebrateBalloon(); // Efeito de balão e fogos
+      
+      if (isCompleted) {
+        toast({
+          title: "🎉 Meta Concluída!",
+          description: `Parabéns! Você completou: ${goal.title}`,
+        });
+      } else {
+        toast({
+          title: "✅ Progresso Atualizado!",
+          description: `Progresso atualizado para ${newValue} ${goal.unit}`,
+        });
+      }
 
       setOpen(false);
       onUpdate?.();
@@ -575,6 +593,15 @@ export const UpdateProgressModal = ({ goal, onUpdate, children }: UpdateProgress
             </Button>
           </div>
         </form>
+        
+        {/* Efeitos Visuais */}
+        <ConfettiAnimation trigger={trigger} duration={3000} />
+        <VisualEffectsManager 
+          trigger={effectTrigger} 
+          effectType={currentEffect} 
+          duration={3000} 
+        />
+        <BalloonFireworksEffect trigger={balloonTrigger} duration={4000} />
       </DialogContent>
     </Dialog>
   );

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -210,6 +210,25 @@ export default function ChallengeManagement({ user }: ChallengeManagementProps) 
   };
 
   const createChallenge = async () => {
+    // Validação básica
+    if (!formData.title.trim()) {
+      toast({
+        title: "Erro",
+        description: "O título do desafio é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.description.trim()) {
+      toast({
+        title: "Erro",
+        description: "A descrição do desafio é obrigatória",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       // Criar desafio real no banco de dados
       const { data, error } = await supabase
@@ -228,9 +247,10 @@ export default function ChallengeManagement({ user }: ChallengeManagementProps) 
 
       if (error) throw error;
 
+      const challengeType = formData.is_group_challenge ? "Público" : "Individual";
       toast({
         title: "Desafio Criado! ✅", 
-        description: `"${formData.title}" foi criado com sucesso`
+        description: `"${formData.title}" (${challengeType}) foi criado com sucesso!`
       });
 
       setIsCreateModalOpen(false);
@@ -376,7 +396,13 @@ export default function ChallengeManagement({ user }: ChallengeManagementProps) 
   const renderModal = (isEdit: boolean) => (
     <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>{isEdit ? 'Editar' : 'Criar'} Desafio</DialogTitle>
+        <DialogTitle className="flex items-center gap-2">
+          <Trophy className="h-5 w-5" />
+          {isEdit ? 'Editar' : 'Criar'} Desafio
+        </DialogTitle>
+        <DialogDescription>
+          Crie um desafio individual para um usuário ou um desafio público para a comunidade
+        </DialogDescription>
       </DialogHeader>
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -550,6 +576,59 @@ export default function ChallengeManagement({ user }: ChallengeManagementProps) 
           </div>
         </div>
 
+        {/* Tipo de Desafio */}
+        <div className="space-y-3">
+          <Label>Tipo de Desafio *</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                !formData.is_group_challenge
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/20 hover:border-muted-foreground/40'
+              }`}
+              onClick={() => setFormData(prev => ({ ...prev, is_group_challenge: false }))}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${
+                  !formData.is_group_challenge ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}>
+                  <Target className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-semibold">Individual</div>
+                  <div className="text-sm text-muted-foreground">
+                    Desafio pessoal para um usuário
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div
+              className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                formData.is_group_challenge
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/20 hover:border-muted-foreground/40'
+              }`}
+              onClick={() => setFormData(prev => ({ ...prev, is_group_challenge: true }))}
+            >
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${
+                  formData.is_group_challenge ? 'bg-primary text-primary-foreground' : 'bg-muted'
+                }`}>
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="font-semibold">Público</div>
+                  <div className="text-sm text-muted-foreground">
+                    Desafio comunitário para vários usuários
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Opções Adicionais */}
         <div className="flex gap-4">
           <div className="flex items-center space-x-2">
             <Switch
@@ -558,15 +637,6 @@ export default function ChallengeManagement({ user }: ChallengeManagementProps) 
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_featured: checked }))}
             />
             <Label htmlFor="featured">Destacado</Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="group"
-              checked={formData.is_group_challenge}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_group_challenge: checked }))}
-            />
-            <Label htmlFor="group">Desafio em Grupo</Label>
           </div>
         </div>
 

@@ -18,7 +18,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { PersonIcon, BodyCompositionIcon, HealthIndicatorIcon } from '@/components/ui/person-icon';
 import { BodyEvolutionChart } from './BodyEvolutionChart';
-import DrVitalAnalysis from './DrVitalAnalysis';
+
+import { User } from '@supabase/supabase-js';
+
 
 const weeklyStats = [
   { day: 'Seg', exercicio: 45, hidratacao: 1.8, sono: 7.5 },
@@ -55,7 +57,7 @@ const StatCard = ({
   color: string;
   description?: string;
 }) => (
-  <Card className="stat-card">
+  <Card className="stat-card stat-card-responsive">
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
       <CardTitle className="text-sm font-medium text-muted-foreground">
         {title}
@@ -63,9 +65,9 @@ const StatCard = ({
       <Icon className={`h-4 w-4 ${color}`} />
     </CardHeader>
     <CardContent>
-      <div className="text-4xl font-bold text-foreground">
+      <div className="stat-number-responsive text-foreground">
         {value}
-        {unit && <span className="text-xl text-muted-foreground ml-1">{unit}</span>}
+        {unit && <span className="text-lg sm:text-xl text-muted-foreground ml-1">{unit}</span>}
       </div>
       {change && (
         <p className="text-xs text-muted-foreground">
@@ -87,7 +89,7 @@ const DashboardOverview: React.FC = () => {
   const [bodyComposition, setBodyComposition] = useState<any[]>([]);
   
   // Obter gênero do usuário
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const { gender, loading: genderLoading } = useUserGender(user);
 
   // Carregar usuário atual
@@ -204,9 +206,9 @@ const DashboardOverview: React.FC = () => {
             <Scale className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-foreground">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
               {stats?.currentWeight || 'N/A'}
-              <span className="text-xl text-muted-foreground ml-1">kg</span>
+              <span className="text-lg sm:text-xl text-muted-foreground ml-1">kg</span>
             </div>
             {weightChange() && (
               <p className="text-xs text-muted-foreground">
@@ -248,9 +250,9 @@ const DashboardOverview: React.FC = () => {
             <Award className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-foreground">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
               78%
-              <span className="text-xl text-muted-foreground ml-1">Meta</span>
+              <span className="text-lg sm:text-xl text-muted-foreground ml-1">Meta</span>
             </div>
             <div className="mt-2 space-y-2">
               {/* Resumo da semana */}
@@ -295,9 +297,6 @@ const DashboardOverview: React.FC = () => {
           </CardContent>
         </div>
       </div>
-
-      {/* Dr. Vital Analysis */}
-      <DrVitalAnalysis />
 
       {/* Main Charts - Body Evolution */}
       <div className="grid grid-cols-1 gap-6">

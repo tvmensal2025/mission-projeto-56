@@ -2,16 +2,44 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://hlrkoyywjpckdotimtik.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhscmtveXl3anBja2RvdGltdGlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTMwNDcsImV4cCI6MjA2ODcyOTA0N30.kYEtg1hYG2pmcyIeXRs-vgNIVOD76Yu7KPlyFN0vdUI";
+// Configuração dinâmica para múltiplas contas do Supabase
+const getSupabaseConfig = () => {
+  const activeAccount = import.meta.env.VITE_ACTIVE_SUPABASE || 'MAIN';
+  
+  if (activeAccount === 'NEW') {
+    return {
+      url: import.meta.env.VITE_SUPABASE_URL_NEW || "https://sua-nova-conta.supabase.co",
+      key: import.meta.env.VITE_SUPABASE_ANON_KEY_NEW || "sua-chave-anonima-nova"
+    };
+  }
+  
+  // Conta principal (padrão)
+  return {
+    url: import.meta.env.VITE_SUPABASE_URL_MAIN || "https://hlrkoyywjpckdotimtik.supabase.co",
+    key: import.meta.env.VITE_SUPABASE_ANON_KEY_MAIN || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhscmtveXl3anBja2RvdGltdGlrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxNTMwNDcsImV4cCI6MjA2ODcyOTA0N30.kYEtg1hYG2pmcyIeXRs-vgNIVOD76Yu7KPlyFN0vdUI"
+  };
+};
+
+const config = getSupabaseConfig();
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+export const supabase = createClient<Database>(config.url, config.key, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
   }
 });
+
+// Função para alternar entre contas
+export const switchSupabaseAccount = (account: 'MAIN' | 'NEW') => {
+  localStorage.setItem('VITE_ACTIVE_SUPABASE', account);
+  window.location.reload();
+};
+
+// Função para obter a conta ativa
+export const getActiveAccount = () => {
+  return import.meta.env.VITE_ACTIVE_SUPABASE || 'MAIN';
+};

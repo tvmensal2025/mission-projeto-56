@@ -1,53 +1,38 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { User, Session } from "@supabase/supabase-js";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { 
-  Heart, 
-  LogOut, 
-  Trophy, 
-  Target, 
-  Calendar, 
-  Home,
-  Activity,
-  GraduationCap,
-  FileText,
-  Clipboard,
-  Award,
-  Settings,
-  TrendingUp,
-  CreditCard,
-  Grid3X3,
-  Menu,
-  X,
-  User as UserIcon,
-  Users,
-  Bug,
-  Bell
-} from "lucide-react";
-import { NotificationBell } from "@/components/NotificationBell";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import DashboardOverview from "@/components/dashboard/DashboardOverview";
-import DailyMissions from "@/components/dashboard/DailyMissions";
-import CoursePlatformNetflix from "@/components/dashboard/CoursePlatformNetflix";
-import { useToast } from "@/hooks/use-toast";
+  Home, Activity, GraduationCap, FileText, Users, Target, 
+  Award, Settings, TrendingUp, Stethoscope, CreditCard, 
+  Menu, LogOut, ChevronLeft, ChevronRight
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+
+// Importações dos componentes
+import DashboardOverview from '@/components/dashboard/DashboardOverview';
+import { DailyMissionsFinal as DailyMissions } from '@/components/daily-missions/DailyMissionsFinal';
+import CoursePlatformNetflix from '@/components/dashboard/CoursePlatformNetflix';
+import SessionsPage from '@/components/SessionsPage';
+import GoalsPage from '@/pages/GoalsPage';
+import DesafiosSection from '@/components/dashboard/DesafiosSection';
+import PublicChallengesPage from '@/pages/PublicChallengesPage';
+import { HealthFeedPage } from '@/pages/HealthFeedPage';
+import PaymentPlans from '@/components/PaymentPlans';
+import UserDrVitalPage from '@/pages/UserDrVitalPage';
+import { UserProfile } from '@/components/UserProfile';
+import DebugDataVerification from '@/components/DebugDataVerification';
 import MyProgress from '@/components/MyProgress';
 import SaboteurTest from '@/components/SaboteurTest';
-import { UserProfile } from "@/components/UserProfile";
-import DebugDataVerification from '@/components/DebugDataVerification';
-import SessionsPage from "@/components/SessionsPage";
-import GoalsPage from "@/pages/GoalsPage";
-import { useUserProfile } from "@/hooks/useUserProfile";
 import { getUserAvatar } from "@/lib/avatar-utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AvatarUpload } from "@/components/ui/avatar-upload";
-import { HealthFeedPage } from "@/pages/HealthFeedPage";
 import { UserProfileSidebar } from "@/components/ui/user-profile-sidebar";
-import PaymentPlans from "@/components/PaymentPlans";
-import ChallengesSection from "@/components/dashboard/ChallengesSection";
 
 type DashboardSection = 
   | 'dashboard' 
@@ -57,9 +42,11 @@ type DashboardSection =
   | 'comunidade' 
   | 'goals'
   | 'challenges'
+  | 'public-challenges'
   | 'saboteur-test'
   | 'progress'
   | 'subscriptions'
+  | 'dr-vital'
   | 'apps'
   | 'help'
   | 'profile'
@@ -114,9 +101,11 @@ const CompleteDashboardPage = () => {
     { id: 'sessions', icon: FileText, label: 'Sessões', color: 'text-muted-foreground' },
     { id: 'comunidade', icon: Users, label: 'Comunidade', color: 'text-blue-500' },
     { id: 'goals', icon: Target, label: 'Minhas Metas', color: 'text-green-500' },
-    { id: 'challenges', icon: Award, label: 'Desafios', color: 'text-orange-500' },
+    { id: 'challenges', icon: Award, label: 'Desafios Individuais', color: 'text-orange-500' },
+    { id: 'public-challenges', icon: Users, label: 'Desafios Públicos', color: 'text-blue-500' },
     { id: 'saboteur-test', icon: Settings, label: 'Teste de Sabotadores', color: 'text-gray-500' },
     { id: 'progress', icon: TrendingUp, label: 'Meu Progresso', color: 'text-cyan-500' },
+    { id: 'dr-vital', icon: Stethoscope, label: 'Dr. Vital', color: 'text-blue-600' },
     { id: 'subscriptions', icon: CreditCard, label: 'Assinaturas', color: 'text-purple-600' },
   ];
 
@@ -137,11 +126,15 @@ const CompleteDashboardPage = () => {
       case 'goals':
         return <GoalsPage />;
       case 'challenges':
-        return <ChallengesSection user={user} />;
+        return <DesafiosSection user={user} />;
+      case 'public-challenges':
+        return <PublicChallengesPage user={user} />;
       case 'comunidade':
         return <HealthFeedPage />;
       case 'subscriptions':
         return <PaymentPlans />;
+      case 'dr-vital':
+        return <UserDrVitalPage />;
       case 'profile':
         return (
           <div className="p-6">
@@ -167,11 +160,7 @@ const CompleteDashboardPage = () => {
         return (
           <div className="p-6">
             <h1 className="text-3xl font-bold mb-4 capitalize">{activeSection.replace('-', ' ')}</h1>
-            <Card className="health-card">
-              <CardContent className="pt-6">
-                <p className="text-muted-foreground">Esta funcionalidade está em desenvolvimento...</p>
-              </CardContent>
-            </Card>
+            <p className="text-muted-foreground">Esta funcionalidade está em desenvolvimento...</p>
           </div>
         );
     }
@@ -314,8 +303,8 @@ const CompleteDashboardPage = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-muted-foreground">Carregando...</p>
+          <h1 className="text-3xl font-bold mb-4 capitalize">Carregando...</h1>
+          <p className="text-muted-foreground">Aguarde enquanto carregamos suas informações.</p>
         </div>
       </div>
     );

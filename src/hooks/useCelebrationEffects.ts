@@ -1,39 +1,39 @@
-import { useState, useCallback } from 'react';
-
-export type CelebrationEffect = 'confetti' | 'fireworks' | 'balloons';
+import { useState } from 'react';
 
 export const useCelebrationEffects = () => {
-  const [activeCelebration, setActiveCelebration] = useState<{
-    type: CelebrationEffect;
-    trigger: boolean;
-  } | null>(null);
+  const [activeCelebration, setActiveCelebration] = useState(false);
 
-  const celebrate = useCallback((type: CelebrationEffect = 'confetti') => {
-    setActiveCelebration({ type, trigger: true });
+  const celebrateDesafioCompletion = () => {
+    setActiveCelebration(true);
     
-    // Reset após um pequeno delay para permitir re-trigger
+    // Reset após 3 segundos
     setTimeout(() => {
-      setActiveCelebration(null);
-    }, 100);
-  }, []);
+      setActiveCelebration(false);
+    }, 3000);
+  };
 
-  const celebrateGoalCompletion = useCallback(() => {
-    celebrate('confetti');
-  }, [celebrate]);
+  const celebrateProgressUpdate = () => {
+    setActiveCelebration(true);
+    
+    // Reset após 2 segundos
+    setTimeout(() => {
+      setActiveCelebration(false);
+    }, 2000);
+  };
 
-  const celebrateChallengeCompletion = useCallback(() => {
-    celebrate('fireworks');
-  }, [celebrate]);
-
-  const celebrateSpecialAchievement = useCallback(() => {
-    celebrate('balloons');
-  }, [celebrate]);
+  const celebrateParticipation = () => {
+    setActiveCelebration(true);
+    
+    // Reset após 1.5 segundos
+    setTimeout(() => {
+      setActiveCelebration(false);
+    }, 1500);
+  };
 
   return {
     activeCelebration,
-    celebrate,
-    celebrateGoalCompletion,
-    celebrateChallengeCompletion,
-    celebrateSpecialAchievement
+    celebrateDesafioCompletion,
+    celebrateProgressUpdate,
+    celebrateParticipation
   };
 };

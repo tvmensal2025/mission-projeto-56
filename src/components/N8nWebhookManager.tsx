@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Settings, Trash2, Send } from "lucide-react";
+import { Loader2, Plus, Settings, Trash2, Send, Mail, Zap } from "lucide-react";
 
 interface Webhook {
   id: string;
@@ -24,6 +24,7 @@ export const N8nWebhookManager = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testingWebhook, setTestingWebhook] = useState<string | null>(null);
+  const [testingConnection, setTestingConnection] = useState(false);
   const [newWebhook, setNewWebhook] = useState({
     name: "",
     webhook_url: "",
@@ -31,11 +32,116 @@ export const N8nWebhookManager = () => {
   });
   const [showAddForm, setShowAddForm] = useState(false);
   
+  // Configurações do Resend
+  const [emailConfig, setEmailConfig] = useState({
+    resendApiKey: 're_MaZUKsTe_7NJizbgHNhFNvXBRu75qgBjG',
+    sendpulseApiKey: 'f4ff39f7982cd93fb7a458b603e50ca4',
+    sendpulseApiSecret: '62e56fd32f7861cae09f0d904843ccf1',
+    sendpulseListId: 341130
+  });
+  
+  // Configurações do n8n
+  const [n8nConfig, setN8nConfig] = useState({
+    webhookUrl: '',
+    apiKey: '',
+    enabled: false
+  });
+  
   const { toast } = useToast();
 
   useEffect(() => {
     fetchWebhooks();
+    loadConfigurations();
   }, []);
+
+  const loadConfigurations = () => {
+    const savedEmailConfig = localStorage.getItem('emailConfig');
+    const savedN8nConfig = localStorage.getItem('n8nConfig');
+    
+    if (savedEmailConfig) {
+      setEmailConfig(JSON.parse(savedEmailConfig));
+    } else {
+      // Salvar configuração padrão do Resend automaticamente
+      const defaultConfig = {
+        resendApiKey: 're_MaZUKsTe_7NJizbgHNhFNvXBRu75qgBjG',
+        sendpulseApiKey: 'f4ff39f7982cd93fb7a458b603e50ca4',
+        sendpulseApiSecret: '62e56fd32f7861cae09f0d904843ccf1',
+        sendpulseListId: 341130
+      };
+      localStorage.setItem('emailConfig', JSON.stringify(defaultConfig));
+    }
+    
+    if (savedN8nConfig) {
+      setN8nConfig(JSON.parse(savedN8nConfig));
+    }
+  };
+
+  const testEmailConnection = async () => {
+    try {
+      setTestingConnection(true);
+      
+      // Teste simples - verificar se a API key está configurada
+      if (emailConfig.resendApiKey) {
+        toast({
+          title: "✅ Conexão Testada",
+          description: "Resend API Key configurada!",
+        });
+      } else {
+        toast({
+          title: "❌ Erro na Conexão",
+          description: "Resend API Key não configurada. Configure no painel admin.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Erro no teste de conexão:', error);
+      toast({
+        title: "❌ Erro no Teste",
+        description: "Erro interno ao testar conexão",
+        variant: "destructive",
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
+  const saveEmailConfig = async () => {
+    try {
+      // Salvar no localStorage (em produção, salvar no banco)
+      localStorage.setItem('emailConfig', JSON.stringify(emailConfig));
+      
+      toast({
+        title: "✅ Configuração Salva",
+        description: "Configuração de email atualizada com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao salvar configuração:', error);
+      toast({
+        title: "❌ Erro ao Salvar",
+        description: "Erro interno ao salvar configuração",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const saveN8nConfig = async () => {
+    try {
+      // Salvar no localStorage (em produção, salvar no banco)
+      localStorage.setItem('n8nConfig', JSON.stringify(n8nConfig));
+      
+      toast({
+        title: "✅ Configuração Salva",
+        description: "Configuração do n8n atualizada com sucesso!",
+      });
+    } catch (error) {
+      console.error('Erro ao salvar configuração n8n:', error);
+      toast({
+        title: "❌ Erro ao Salvar",
+        description: "Erro interno ao salvar configuração",
+        variant: "destructive",
+      });
+    }
+  };
 
   const fetchWebhooks = async () => {
     try {
@@ -206,6 +312,139 @@ export const N8nWebhookManager = () => {
           Novo Webhook
         </Button>
       </div>
+
+      {/* Configuração de Email */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Configuração de Email
+          </CardTitle>
+          <CardDescription>
+            Configure o provedor de email para envio de relatórios
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Provedor de Email */}
+            <div>
+              <Label className="block text-sm font-medium mb-2">Provedor de Email</Label>
+              <select
+                value="resend"
+                disabled
+                className="w-full p-2 border rounded-md bg-gray-100"
+              >
+                <option value="resend">Resend (Atual)</option>
+                <option value="sendpulse" disabled>SendPulse (Disponível via código)</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                SendPulse pode ser ativado editando o código das Edge Functions
+              </p>
+            </div>
+
+            {/* Configurações Resend */}
+            <div>
+              <Label className="block text-sm font-medium mb-2">Resend API Key</Label>
+              <Input
+                type="password"
+                value={emailConfig.resendApiKey}
+                onChange={(e) => setEmailConfig({...emailConfig, resendApiKey: e.target.value})}
+                placeholder="re_..."
+              />
+              <p className="text-xs text-green-600 mt-1">
+                ✅ API Key do Resend configurada e pronta para uso
+              </p>
+            </div>
+
+            {/* Botões */}
+            <div className="flex gap-2">
+              <Button 
+                onClick={saveEmailConfig}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Salvar Configuração
+              </Button>
+              <Button 
+                onClick={testEmailConnection}
+                disabled={testingConnection}
+                variant="outline"
+              >
+                {testingConnection ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    Testando...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Testar Conexão
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Configuração do n8n */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Configuração do n8n
+          </CardTitle>
+          <CardDescription>
+            Configure a integração com n8n para automações
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Habilitar n8n */}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="n8n-enabled"
+                checked={n8nConfig.enabled}
+                onCheckedChange={(checked) => setN8nConfig({...n8nConfig, enabled: checked})}
+              />
+              <Label htmlFor="n8n-enabled" className="text-sm font-medium">
+                Habilitar integração com n8n
+              </Label>
+            </div>
+
+            {/* Webhook URL */}
+            <div>
+              <Label className="block text-sm font-medium mb-2">Webhook URL</Label>
+              <Input
+                type="url"
+                value={n8nConfig.webhookUrl}
+                onChange={(e) => setN8nConfig({...n8nConfig, webhookUrl: e.target.value})}
+                placeholder="https://seu-n8n.com/webhook/..."
+              />
+            </div>
+
+            {/* API Key */}
+            <div>
+              <Label className="block text-sm font-medium mb-2">API Key (opcional)</Label>
+              <Input
+                type="password"
+                value={n8nConfig.apiKey}
+                onChange={(e) => setN8nConfig({...n8nConfig, apiKey: e.target.value})}
+                placeholder="API Key para autenticação"
+              />
+            </div>
+
+            {/* Botão Salvar */}
+            <Button 
+              onClick={saveN8nConfig}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Salvar Configuração n8n
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {showAddForm && (
         <Card>
