@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./public:/usr/share/nginx/html/public
+    restart: unless-stopped
+
+  # Supabase local (opcional)
+  supabase:
+    image: supabase/postgres:15.1.0.117
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: your-super-secret-and-long-postgres-password
+      POSTGRES_DB: postgres
+    volumes:
+      - supabase_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  supabase_data: 
